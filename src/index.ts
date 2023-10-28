@@ -10,6 +10,13 @@ export class Coord {
     }
 }
 
+export function FloatEquals(a: number, b: number): boolean {
+  if (Math.abs(a-b) < 0.0001) {
+    return true
+  }
+  return false
+}
+
 export enum JoystickRegion {
     DZ = 0,
     NE = 1,
