@@ -1,4 +1,5 @@
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
+export * from './slippi'
 
 export class Coord {
     x: number
