@@ -1,6 +1,29 @@
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export * from './slippi'
 
+
+export class Check {
+  name: string
+  isProbabilistic: boolean
+
+  constructor() {
+    this.name = "unknown"
+    this.isProbabilistic = false
+  }
+}
+
+// Provide an array of strings that describe the available Checks
+export function ListChecks(): Check[] {
+  var checks: Check[]
+
+  var disallowedAnalogValues: Check
+  disallowedAnalogValues.name = "Disallowed Analog C-Stick Values"
+  disallowedAnalogValues.isProbabilistic = false
+  checks.push(disallowedAnalogValues)
+
+  return checks
+}
+
 export class Coord {
     x: number
     y: number
