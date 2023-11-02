@@ -28,9 +28,13 @@ export class Coord {
     x: number
     y: number
 
-    constructor() {
-      this.x = 0
-      this.y = 0
+    constructor(x: number, y: number) {
+      this.x = x
+      this.y = y
+    }
+
+    isEqual(other: Coord): boolean {
+      return (FloatEquals(this.x, other.x) && FloatEquals(this.y, other.y))
     }
 }
 
@@ -75,4 +79,31 @@ export function getJoystickRegion(x: number, y: number): JoystickRegion {
     }
   
     return region;
+  }
+
+  export function getTargetCoords(coordinates: Coord[]): Coord[] {
+    var targets: Coord[] = []
+    var lastCoord: Coord = null
+    for (let coord of coordinates) {
+      if (lastCoord != null) {
+        if (lastCoord.isEqual(coord)) {
+            targets.push(coord)
+        }
+      }
+      lastCoord = coord
+    }
+    return targets
+  }
+
+  export function isBoxController(coordinates: Coord[]): boolean {
+    var targets = getTargetCoords(coordinates)
+    const deadCenter: Coord = new Coord(0, 0)
+    // If we get a non-zero target coord in the deadzone, then it's def a GCN controller
+    for (let target of targets) {
+      if (!target.isEqual(deadCenter) && getJoystickRegion(target.x, target.y) === JoystickRegion.DZ) {
+        return false
+      }
+    }
+    // TODO Other checks
+    return true
   }

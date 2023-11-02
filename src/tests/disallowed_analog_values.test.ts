@@ -3,13 +3,9 @@ import {Coord, hasDisallowedCStickCoords} from '../index';
 
 test('Should pass check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
-    var coord = new Coord() 
-    coord.x = 0
-    coord.y = 0
+    var coord = new Coord(0, 0) 
     coords.push(coord)
-    coord = new Coord() 
-    coord.x = 1
-    coord.y = 1
+    coord = new Coord(1, 1) 
     coords.push(coord)
     
     const result = hasDisallowedCStickCoords(coords);
@@ -18,9 +14,7 @@ test('Should pass check for disallowed C-Stick values', () => {
 
 test('Should trigger check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
-    var coord = new Coord() 
-    coord.x = 0.8
-    coord.y = 0
+    var coord = new Coord(0.8, 0) 
     coords.push(coord)
     
     const result = hasDisallowedCStickCoords(coords);
@@ -29,9 +23,7 @@ test('Should trigger check for disallowed C-Stick values', () => {
 
 test('Should trigger check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
-    var coord = new Coord() 
-    coord.x = 0.6625
-    coord.y = 0
+    var coord = new Coord(0.6625, 0) 
     coords.push(coord)
     
     const result = hasDisallowedCStickCoords(coords);
