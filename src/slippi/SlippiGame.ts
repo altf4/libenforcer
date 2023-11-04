@@ -66,7 +66,7 @@ export class SlippiGame {
         buffer: input,
       };
     } else {
-      throw new Error("Cannot create SlippiGame with input of that type");
+      throw new Error("Cannot create SlippiGame with input of that type: " + typeof(input));
     }
 
     // Set up stats calculation
