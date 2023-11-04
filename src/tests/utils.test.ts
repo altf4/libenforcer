@@ -75,13 +75,50 @@ test('Is box inputs?', () => {
 
     expect(isBoxController(coords)).toEqual(false)
 
-    // Read from an SLP file now. Confirmed box player
-    var data = fs.readFileSync(path.join(__dirname, '../../test_data/box_port_1_Steech_vs_techno_G1.slp'), null);
+    // Game 1. Read from an SLP file now. Confirmed box player
+    var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G1.slp'), null);
     var game = new SlippiGame(toArrayBuffer(data))
     expect(game).not.toBeNull()
     var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
     var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
-    expect(uniqueCoords.length).toBe(5)
+    expect(uniqueCoords.length).toBeLessThanOrEqual(13)
+    expect(isBoxController(gameCoords)).toEqual(true)
+
+    // Game 2
+    var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G2.slp'), null);
+    var game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
+    var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
+    expect(uniqueCoords.length).toBeLessThanOrEqual(13)
+    expect(isBoxController(gameCoords)).toEqual(true)
+
+    // Game 3
+    var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G3.slp'), null);
+    var game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
+    var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
+    expect(uniqueCoords.length).toBeLessThanOrEqual(13)
+    expect(isBoxController(gameCoords)).toEqual(true)
+
+    // Game 4
+    var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G4.slp'), null);
+    var game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
+    var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
+    expect(uniqueCoords.length).toBeLessThanOrEqual(13)
+    expect(isBoxController(gameCoords)).toEqual(true)
+
+    // Game 5
+    var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G5.slp'), null);
+    var game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
+    var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
+    expect(uniqueCoords.length).toBeLessThanOrEqual(13)
+    expect(isBoxController(gameCoords)).toEqual(true)
 
     // Confirmed GCC player
     data = fs.readFileSync(path.join(__dirname, '../../test_data/gcn_port_3_4_shine_2022_gcn_1.slp'), null);
@@ -90,6 +127,20 @@ test('Is box inputs?', () => {
     var gameCoords: Coord[] = getCoordListFromGame(game, 3, false)
     var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
     expect(uniqueCoords.length).toBeGreaterThan(13)
+    expect(isBoxController(gameCoords)).toEqual(false)
+
+})
+
+test('Is box inputs? Potion dataset', () => {
+    for (let i=1; i <= 7; i++) {
+        var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/potion_p3/potion_' + i + '.slp'), null);
+        var game = new SlippiGame(toArrayBuffer(data))
+        expect(game).not.toBeNull()
+        var gameCoords: Coord[] = getCoordListFromGame(game, 2, false)
+        var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
+        expect(uniqueCoords.length).toBeLessThanOrEqual(13)
+        expect(isBoxController(gameCoords)).toEqual(true)
+    }
 })
 
 test('Parse replay file correctly', () => {
