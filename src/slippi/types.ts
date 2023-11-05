@@ -178,6 +178,7 @@ export type PreFrameUpdateType = {
   physicalLTrigger: number | null;
   physicalRTrigger: number | null;
   rawJoystickX: number | null;
+  rawJoystickY: number | null;
   percent: number | null;
 };
 

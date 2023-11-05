@@ -15,63 +15,59 @@ test('Get target coords', () => {
     var coords: Coord[] = []
     expect(getTargetCoords(coords).length).toEqual(0)
 
-    coords.push(new Coord(0, 0))
-    coords.push(new Coord(-1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(-1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(.5, .5))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
+    coords.push({x: 0, y: 0})
+    coords.push({x: -1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: -1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 0.5, y: 0.5})
+    coords.push({x: 1, y: 0.5})
+    coords.push({x: 1, y: 0.5})
+    coords.push({x: 1, y: 0.5})
 
     var targets = getTargetCoords(coords)
-    expect(targets.length).toEqual(1)
-
-    expect(targets[0]).toBeInstanceOf(Coord)
+    expect(targets.length).toEqual(2)
 })
 
 test('Get unique coords', () => {
     var coords: Coord[] = []
     expect(getUniqueCoords(coords).length).toEqual(0)
 
-    coords.push(new Coord(0, 0))
-    coords.push(new Coord(-1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(-1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(.5, .5))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
+    coords.push({x: 0, y: 0})
+    coords.push({x: -1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: -1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 0.5, y: 0.5})
+    coords.push({x: 1, y: 0.5})
+    coords.push({x: 1, y: 0.5})
+    coords.push({x: 1, y: 0.5})
 
     var targets = getUniqueCoords(coords)
-    expect(targets.length).toEqual(4)
-
-    expect(targets[0]).toBeInstanceOf(Coord)
+    expect(targets.length).toEqual(5)
 })
 
 test('Is box inputs?', () => {
     var coords: Coord[] = []
-    coords.push(new Coord(0, 0))
-    coords.push(new Coord(-1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(-1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(1, 0))
-    coords.push(new Coord(.5, .5))
-    coords.push(new Coord(1, 0))
+    coords.push({x: 0, y: 0})
+    coords.push({x: -1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: -1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 1, y: 0})
+    coords.push({x: 0.5, y: 0.5})
+    coords.push({x: 1, y: 0})
 
     expect(isBoxController(coords)).toEqual(true)
 
-    coords.push(new Coord(0.01, 0.01))
-    coords.push(new Coord(0.01, 0.01))
+    coords.push({x: 0.01, y: 0.01})
+    coords.push({x: 0.01, y: 0.01})
 
     expect(isBoxController(coords)).toEqual(false)
 
@@ -121,14 +117,14 @@ test('Is box inputs?', () => {
     expect(isBoxController(gameCoords)).toEqual(true)
 
     // Confirmed GCC player
-    data = fs.readFileSync(path.join(__dirname, '../../test_data/gcn_port_3_4_shine_2022_gcn_1.slp'), null);
+    data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/Game_8C56C529AEAA_20231022T181554.slp'), null);
     var game = new SlippiGame(toArrayBuffer(data))
     expect(game).not.toBeNull()
     var gameCoords: Coord[] = getCoordListFromGame(game, 3, false)
+    expect(gameCoords.length).toBeGreaterThan(0)
     var uniqueCoords: Coord[] = getUniqueCoords(gameCoords)
     expect(uniqueCoords.length).toBeGreaterThan(13)
     expect(isBoxController(gameCoords)).toEqual(false)
-
 })
 
 test('Is box inputs? Potion dataset', () => {

@@ -494,6 +494,7 @@ export function parseMessage(command: Command, payload: Uint8Array): EventPayloa
         physicalRTrigger: readFloat(view, 0x37),
         rawJoystickX: readInt8(view, 0x3b),
         percent: readFloat(view, 0x3c),
+        rawJoystickY: readInt8(view, 0x40),
       };
     case Command.POST_FRAME_UPDATE:
       const selfInducedSpeeds: SelfInducedSpeedsType = {

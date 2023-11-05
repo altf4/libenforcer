@@ -1,4 +1,5 @@
 import {SlippiGame, FramesType} from './slippi'
+import * as semver from 'semver'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export * from './slippi'
@@ -26,24 +27,32 @@ export function ListChecks(): Check[] {
   return checks
 }
 
-export class Coord {
+// Most of entire controller state in one type
+export type GamePad = {
+  mainStick: Coord
+  cStick: Coord
+  trigger: number
+  a: boolean
+  b: boolean
+  x: boolean
+  y: boolean
+  z: boolean
+  l: boolean
+  r: boolean
+}
+
+export type Coord = {
   x: number
   y: number
+}
 
-  constructor(x: number, y: number) {
-    this.x = x
-    this.y = y
-  }
+export function jsonToCoord(json: string): Coord {
+  var parsed = JSON.parse(json)
+  return {x: parsed.x, y: parsed.y}
+}
 
-  fromJSON(json: string) {
-    var parsed = JSON.parse(json)
-    this.x = parsed.x
-    this.y = parsed.y
-  }
-
-  isEqual(other: Coord): boolean {
-    return (FloatEquals(this.x, other.x) && FloatEquals(this.y, other.y))
-  }
+export function isEqual(one: Coord, other: Coord): boolean {
+  return (FloatEquals(one.x, other.x) && FloatEquals(one.y, other.y))
 }
 
 export function FloatEquals(a: number, b: number): boolean {
@@ -110,9 +119,7 @@ export function getUniqueCoords(coordinates: Coord[]): Coord[] {
   //  Get your shit together, JavaScript
   var targets: Coord[] = []
   for (let target of targetsSet) {
-    var coord: Coord = new Coord(0,0)
-    coord.fromJSON(target)
-    targets.push(coord)
+    targets.push(jsonToCoord(target))
   }
 
   return targets  
@@ -127,7 +134,7 @@ export function getTargetCoords(coordinates: Coord[]): Coord[] {
   var lastCoord: Coord = null
   for (let coord of coordinates) {
     if (lastCoord != null) {
-      if (lastCoord.isEqual(coord)) {
+      if (isEqual(lastCoord, coord)) {
         targetsSet.add(JSON.stringify(coord))
       }
     }
@@ -137,10 +144,8 @@ export function getTargetCoords(coordinates: Coord[]): Coord[] {
   // All of this just so we can have a set of an object by value
   //  Get your shit together, JavaScript
   var targets: Coord[] = []
-  for (let target of targetsSet) {
-    var coord: Coord = new Coord(0,0)
-    coord.fromJSON(target)
-    targets.push(coord)
+  for (let target of targetsSet) {   
+    targets.push(jsonToCoord(target))
   }
 
   return targets
@@ -152,10 +157,10 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
   var frame: number = -123
   while (true) {
     try {
-      var coord = new Coord(0, 0)
+      var coord: Coord = {x: 0, y: 0}
       var x: number = 0
       if (isMainStick) {
-        x = frames[frame].players[playerIndex]?.pre.joystickX
+        x = frames[frame].players[playerIndex]?.pre.rawJoystickX
       } else {
         x = frames[frame].players[playerIndex]?.pre.cStickX
       }
@@ -164,7 +169,7 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
       }
       var y: number = 0
       if (isMainStick) {
-        y = frames[frame].players[playerIndex]?.pre.joystickY
+        y = frames[frame].players[playerIndex]?.pre.rawJoystickY
       } else {
         y = frames[frame].players[playerIndex]?.pre.cStickY
       }
@@ -183,10 +188,10 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
 
 export function isBoxController(coordinates: Coord[]): boolean {
   var targets = getTargetCoords(coordinates)
-  const deadCenter: Coord = new Coord(0, 0)
+  var deadCenter: Coord = {x: 0, y: 0}
   // If we get a non-zero target coord in the deadzone, then it's def a GCN controller
   for (let target of targets) {
-    if (!target.isEqual(deadCenter) && getJoystickRegion(target.x, target.y) === JoystickRegion.DZ) {
+    if (!isEqual(target, deadCenter) && getJoystickRegion(target.x, target.y) === JoystickRegion.DZ) {
       return false
     }
   }
@@ -199,4 +204,9 @@ export function isBoxController(coordinates: Coord[]): boolean {
 
   // TODO Other checks
   return true
+}
+
+// Is this a supported SLP replay version?
+export function isSlpMinVersion(game: SlippiGame): boolean {
+  return semver.lt(game.getSettings().slpVersion, '3.15.0')
 }

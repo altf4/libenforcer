@@ -5,10 +5,8 @@ import * as path from 'path';
 
 test('Should pass check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
-    var coord = new Coord(0, 0) 
-    coords.push(coord)
-    coord = new Coord(1, 1) 
-    coords.push(coord)
+    coords.push({x: 0, y: 0})
+    coords.push({x: 1, y: 1})
     
     const result = hasDisallowedCStickCoords(coords);
     expect(result).toEqual(false);
@@ -16,8 +14,7 @@ test('Should pass check for disallowed C-Stick values', () => {
 
 test('Should trigger check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
-    var coord = new Coord(0.8, 0) 
-    coords.push(coord)
+    coords.push({x: 0.8, y: 0})
     
     const result = hasDisallowedCStickCoords(coords);
     expect(result).toEqual(true);
@@ -25,8 +22,7 @@ test('Should trigger check for disallowed C-Stick values', () => {
 
 test('Should trigger check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
-    var coord = new Coord(0.6625, 0) 
-    coords.push(coord)
+    coords.push({x: 0.6625, y: 0})
     
     const result = hasDisallowedCStickCoords(coords);
     expect(result).toEqual(true);
