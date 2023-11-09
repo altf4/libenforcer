@@ -2,6 +2,7 @@ import {SlippiGame, FramesType} from './slippi'
 import * as semver from 'semver'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
+export {averageTravelCoordHitRate} from './travel_time'
 export * from './slippi'
 
 
