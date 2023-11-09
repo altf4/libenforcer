@@ -32,7 +32,6 @@ test('Test full game with disallowed C-stick value', () => {
     var data: Buffer = fs.readFileSync(path.join(__dirname, '../../test_data/banned_c_stick_analog_player_1.slp'), null);
     var game = new SlippiGame(toArrayBuffer(data))
     expect(game).toBeDefined()
-
     var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
     expect(hasDisallowedCStickCoords(gameCoords)).toBe(true)
 })

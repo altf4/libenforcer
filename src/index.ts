@@ -151,6 +151,45 @@ export function getTargetCoords(coordinates: Coord[]): Coord[] {
   return targets
 }
 
+export function processAnalogStick(coord: Coord, deadzone: boolean): Coord {
+  let magnitudeSquared = (coord.x*coord.x) + (coord.y*coord.y)
+  if (magnitudeSquared < 1e-3) {
+    return {x: 0, y: 0}
+  }
+
+  let magnitude = Math.sqrt(magnitudeSquared)
+  const threshold = 80
+
+  let fX: number = coord.x
+  let fY: number = coord.y
+  if (magnitude > threshold) {
+    let shrinkFactor = threshold / magnitude
+    if (fX > 0) {
+      fX = Math.floor(fX * shrinkFactor)
+      fY = Math.floor(fY * shrinkFactor)  
+    } else {
+      fX = Math.ceil(fX * shrinkFactor)
+      fY = Math.ceil(fY * shrinkFactor)  
+    }
+  }
+
+  // Apply deadzone if applicable
+  if (deadzone) {
+    if (Math.abs(fX) < 23) {
+      fX = 0
+    }
+    if (Math.abs(fY) < 23) {
+      fY = 0
+    }
+  }
+
+  // Round to the nearest integer (pixel)
+  fX = Math.round(fX)
+  fY = Math.round(fY)
+
+  return {x: Math.floor(fX) / 80, y: Math.floor(fY) / 80}
+}
+
 export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMainStick: boolean): Coord[] {
   var frames: FramesType = game.getFrames()
   var coords: Coord[] = []
@@ -176,6 +215,11 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
       if (y !== undefined && y !== null) {
         coord.y = y
       }
+
+      if(isMainStick) {
+        coord = processAnalogStick(coord, false)
+      }
+
       coords.push(coord)
     }
     catch(err: any) {
@@ -189,16 +233,19 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
 export function isBoxController(coordinates: Coord[]): boolean {
   var targets = getTargetCoords(coordinates)
   var deadCenter: Coord = {x: 0, y: 0}
-  // If we get a non-zero target coord in the deadzone, then it's def a GCN controller
+  // If we get a non-zero target coord in the deadzone, then it's def analog
+  //  NOTE: The opposite is not true. It's normal to have an analog controller 
+  //    sometimes only register targets at 0,0
   for (let target of targets) {
-    if (!isEqual(target, deadCenter) && getJoystickRegion(target.x, target.y) === JoystickRegion.DZ) {
+    if (!isEqual(target, deadCenter) && (getJoystickRegion(target.x, target.y) === JoystickRegion.DZ)) {
       return false
     }
   }
 
-  // If we get more than 13 total C-stick coords, then it's analog
-  // 13 is the maximum allowed number of digital coordinates
-  if (getUniqueCoords(coordinates).length > 13) {
+  // Is the overall gamewide unique coords/sec rate > 5?
+  let uniqueCoords = getUniqueCoords(coordinates)
+  let coordsPerSecond: number = ((uniqueCoords.length*60)/coordinates.length)
+  if (coordsPerSecond > 5) {
     return false
   }
 
@@ -209,4 +256,28 @@ export function isBoxController(coordinates: Coord[]): boolean {
 // Is this a supported SLP replay version?
 export function isSlpMinVersion(game: SlippiGame): boolean {
   return semver.lt(game.getSettings().slpVersion, '3.15.0')
+}
+
+export function isHandwarmer(game: SlippiGame): boolean {
+  for (let playerIndex in game.getFrames()[0].players) {
+    let coords = getCoordListFromGame(game, parseInt(playerIndex), true)
+    // If the game is less than a minute long, then it's a handwarmer
+    if (coords.length < 3600) {
+      return true
+    }
+
+    // If a player went 10 straight seconds in the deadzone, then it's a handwarmer
+    let deadzoneFrames: number = 0
+    for (let coord of coords) {
+      if (getJoystickRegion(coord.x, coord.y) === JoystickRegion.DZ) {
+        deadzoneFrames++
+      } else {
+        deadzoneFrames = 0
+      }
+      if (deadzoneFrames > 600) {
+        return true
+      }
+    }
+  }
+  return false
 }
