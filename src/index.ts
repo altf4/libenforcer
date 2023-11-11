@@ -1,10 +1,10 @@
 import {SlippiGame, FramesType} from './slippi'
 import * as semver from 'semver'
 import {hasDisallowedCStickCoords} from './disallowed_analog_values'
-import {hasLegalTravelTime} from './travel_time'
+import {hasIllegalTravelTime} from './travel_time'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
-export {averageTravelCoordHitRate, hasLegalTravelTime} from './travel_time'
+export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
 export * from './slippi'
 
 
@@ -18,7 +18,7 @@ export function ListChecks(): Check[] {
   var checks: Check[] = []
 
   checks.push({name: "Box Travel Time", 
-              checkFunction: hasLegalTravelTime
+              checkFunction: hasIllegalTravelTime
               })
   checks.push({name: "Disallowed Analog C-Stick Values", 
               checkFunction: hasDisallowedCStickCoords
