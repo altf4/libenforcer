@@ -1,30 +1,28 @@
 import {SlippiGame, FramesType} from './slippi'
 import * as semver from 'semver'
+import {hasDisallowedCStickCoords} from './disallowed_analog_values'
+import {hasLegalTravelTime} from './travel_time'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
-export {averageTravelCoordHitRate} from './travel_time'
+export {averageTravelCoordHitRate, hasLegalTravelTime} from './travel_time'
 export * from './slippi'
 
 
-export class Check {
+export type Check = {
   name: string
-  isProbabilistic: boolean
-
-  constructor() {
-    this.name = "unknown"
-    this.isProbabilistic = false
-  }
+  checkFunction: (game: SlippiGame, playerIndex: number, coords: Coord[]) => boolean
 }
 
 // Provide an array of strings that describe the available Checks
 export function ListChecks(): Check[] {
   var checks: Check[]
 
-  var disallowedAnalogValues: Check
-  disallowedAnalogValues.name = "Disallowed Analog C-Stick Values"
-  disallowedAnalogValues.isProbabilistic = false
-  checks.push(disallowedAnalogValues)
-
+  checks.push({name: "Box Travel Time", 
+              checkFunction: hasLegalTravelTime
+              })
+  checks.push({name: "Disallowed Analog C-Stick Values", 
+              checkFunction: hasDisallowedCStickCoords
+              })
   return checks
 }
 

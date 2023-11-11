@@ -1,4 +1,20 @@
-import {Coord, isEqual} from './index';
+import {SlippiGame} from './slippi'
+import {Coord, isBoxController, isEqual} from './index';
+
+export function hasLegalTravelTime(game: SlippiGame, playerIndex: number, coords: Coord[]) {
+    // If we're on analog, then it always passes
+    if (!isBoxController(coords)) {
+        return true
+    }
+ 
+    // Box controllers should hit 36%
+    //  TODO: Is 30% a reasonable cutoff? Maybe it should be lower?
+    if (averageTravelCoordHitRate(coords) < 0.30) {
+        return false
+    }
+    
+    return true
+}
 
 export function averageTravelCoordHitRate(coordinates: Coord[]): number {
     let travelCoordCount: number = 0

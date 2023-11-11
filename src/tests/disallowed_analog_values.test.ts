@@ -8,7 +8,7 @@ test('Should pass check for disallowed C-Stick values', () => {
     coords.push({x: 0, y: 0})
     coords.push({x: 1, y: 1})
     
-    const result = hasDisallowedCStickCoords(coords);
+    const result = hasDisallowedCStickCoords(null, 0, coords);
     expect(result).toEqual(false);
 })
 
@@ -16,7 +16,7 @@ test('Should trigger check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
     coords.push({x: 0.8, y: 0})
     
-    const result = hasDisallowedCStickCoords(coords);
+    const result = hasDisallowedCStickCoords(null, 0, coords);
     expect(result).toEqual(true);
 })
 
@@ -24,7 +24,7 @@ test('Should trigger check for disallowed C-Stick values', () => {
     var coords: Coord[] = []
     coords.push({x: 0.6625, y: 0})
     
-    const result = hasDisallowedCStickCoords(coords);
+    const result = hasDisallowedCStickCoords(null, 0, coords);
     expect(result).toEqual(true);
 })
 
@@ -33,5 +33,5 @@ test('Test full game with disallowed C-stick value', () => {
     var game = new SlippiGame(toArrayBuffer(data))
     expect(game).toBeDefined()
     var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
-    expect(hasDisallowedCStickCoords(gameCoords)).toBe(true)
+    expect(hasDisallowedCStickCoords(game, 0, gameCoords)).toBe(true)
 })
