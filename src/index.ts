@@ -15,7 +15,7 @@ export type Check = {
 
 // Provide an array of strings that describe the available Checks
 export function ListChecks(): Check[] {
-  var checks: Check[]
+  var checks: Check[] = []
 
   checks.push({name: "Box Travel Time", 
               checkFunction: hasLegalTravelTime

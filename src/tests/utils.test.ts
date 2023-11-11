@@ -1,5 +1,5 @@
 import {expect, test} from '@jest/globals';
-import {FloatEquals, getTargetCoords, getUniqueCoords, isBoxController, Coord, SlippiGame, FramesType, getCoordListFromGame, toArrayBuffer, processAnalogStick, isEqual, getJoystickRegion, isHandwarmer} from '../index';
+import {FloatEquals, getTargetCoords, getUniqueCoords, isBoxController, Coord, SlippiGame, FramesType, getCoordListFromGame, toArrayBuffer, processAnalogStick, isEqual, Check, isHandwarmer, ListChecks} from '../index';
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -164,4 +164,9 @@ test('Is handwarmer?', async () => {
         var game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toBe(true)
     }
+})
+
+test('List checks', () => {
+    let checks: Check[] = ListChecks()
+    expect(checks.length).toBe(2)
 })
