@@ -266,6 +266,8 @@ export function isHandwarmer(game: SlippiGame): boolean {
     }
 
     // If a player went 10 straight seconds in the deadzone, then it's a handwarmer
+    //  *while alive
+    let frameIndex = -123
     let deadzoneFrames: number = 0
     for (let coord of coords) {
       if (getJoystickRegion(coord.x, coord.y) === JoystickRegion.DZ) {
@@ -273,9 +275,13 @@ export function isHandwarmer(game: SlippiGame): boolean {
       } else {
         deadzoneFrames = 0
       }
+      if (!(playerIndex in game.getFrames()[frameIndex].players)) {
+        deadzoneFrames = 0
+      }
       if (deadzoneFrames > 600) {
         return true
       }
+      frameIndex++
     }
   }
   return false

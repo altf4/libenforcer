@@ -152,18 +152,22 @@ test('Is handwarmer?', async () => {
     const slpDir = path.join(__dirname, '../../test_data/legal/digital/techno_p1')
     const files: string[] = await fs.promises.readdir(slpDir);
     for(const filename of files ) {
-        var data = fs.readFileSync(path.join(slpDir, filename), null);
-        var game = new SlippiGame(toArrayBuffer(data))
+        let data = fs.readFileSync(path.join(slpDir, filename), null);
+        let game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toBe(false)
     }
 
     const handwarmerDir = path.join(__dirname, '../../test_data/handwarmers/')
     const handwarmerFiles: string[] = await fs.promises.readdir(handwarmerDir);
     for(const filename of handwarmerFiles ) {
-        var data = fs.readFileSync(path.join(handwarmerDir, filename), null);
-        var game = new SlippiGame(toArrayBuffer(data))
+        let data = fs.readFileSync(path.join(handwarmerDir, filename), null);
+        let game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toBe(true)
     }
+
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/doubles_match_1.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(isHandwarmer(game)).toBe(false)
 })
 
 test('List checks', () => {
