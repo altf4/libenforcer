@@ -149,6 +149,7 @@ test('Process main stick inputs', () => {
 })
 
 test('Is handwarmer?', async () => {
+    jest.setTimeout(10000);
     const slpDir = path.join(__dirname, '../../test_data/legal/digital/techno_p1')
     const files: string[] = await fs.promises.readdir(slpDir);
     for(const filename of files ) {
@@ -168,5 +169,5 @@ test('Is handwarmer?', async () => {
 
 test('List checks', () => {
     let checks: Check[] = ListChecks()
-    expect(checks.length).toBe(2)
+    expect(checks.length).toBe(3)
 })

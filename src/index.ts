@@ -2,9 +2,11 @@ import {SlippiGame, FramesType} from './slippi'
 import * as semver from 'semver'
 import {hasDisallowedCStickCoords} from './disallowed_analog_values'
 import {hasIllegalTravelTime} from './travel_time'
+import {hasIllegalSOCD} from './socd'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
+export {hasIllegalSOCD} from './socd'
 export * from './slippi'
 
 
@@ -18,11 +20,16 @@ export function ListChecks(): Check[] {
   var checks: Check[] = []
 
   checks.push({name: "Box Travel Time", 
-              checkFunction: hasIllegalTravelTime
+                checkFunction: hasIllegalTravelTime
               })
   checks.push({name: "Disallowed Analog C-Stick Values", 
-              checkFunction: hasDisallowedCStickCoords
+                checkFunction: hasDisallowedCStickCoords
               })
+              checks.push({name: "No Neutral SOCD", 
+                checkFunction: hasIllegalSOCD
+              })
+
+              
   return checks
 }
 
