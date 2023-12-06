@@ -7,12 +7,12 @@ export function hasIllegaUptiltRounding(game: SlippiGame, playerIndex: number, c
         return false
     }
 
-    // 0.2 - 0.275
+    // y in range 0.2 - 0.275
     for (let coord of coords) {
-        if (coord.y > 0.199 && coord.y < 0.2749) {
+        // Only consider coords in the x deadzone
+        if (Math.abs(coord.x) < 0.2876 && coord.y > 0.199 && coord.y < 0.2749) {
             return false
         }
     }
-    
     return true
 }
