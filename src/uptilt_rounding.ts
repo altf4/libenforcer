@@ -1,7 +1,7 @@
 import {SlippiGame} from './slippi'
 import {Coord, isBoxController, isEqual} from './index';
 
-export function hasIllegaUptiltRounding(game: SlippiGame, playerIndex: number, coords: Coord[]) {
+export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, coords: Coord[]) {
     // If we're on ditigal, then it always passes
     if (isBoxController(coords)) {
         return false

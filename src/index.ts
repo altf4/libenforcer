@@ -2,11 +2,13 @@ import {SlippiGame, FramesType} from './slippi'
 import * as semver from 'semver'
 import {hasDisallowedCStickCoords} from './disallowed_analog_values'
 import {hasIllegalTravelTime} from './travel_time'
-import {hasIllegaUptiltRounding} from './uptilt_rounding'
+import {hasIllegalUptiltRounding} from './uptilt_rounding'
+import {hasIllegalCrouchUptilt} from './crouch_uptilt'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
-export {hasIllegaUptiltRounding} from './uptilt_rounding'
+export {hasIllegalUptiltRounding} from './uptilt_rounding'
+export {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export * from './slippi'
 
 export type Check = {
@@ -25,8 +27,11 @@ export function ListChecks(): Check[] {
               checkFunction: hasDisallowedCStickCoords
               })
   checks.push({name: "Uptilt Rounding", 
-              checkFunction: hasIllegaUptiltRounding
+              checkFunction: hasIllegalUptiltRounding
               })
+  checks.push({name: "Fast Crouch Uptilt", 
+              checkFunction: hasIllegalCrouchUptilt
+              })              
   return checks
 }
 
