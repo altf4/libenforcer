@@ -148,7 +148,7 @@ test('Process main stick inputs', () => {
     }
 })
 
-test('Is handwarmer?', async () => {
+test('Is handwarmer? (A)', async () => {
     const slpDir = path.join(__dirname, '../../test_data/legal/digital/techno_p1')
     const files: string[] = await fs.promises.readdir(slpDir);
     for(const filename of files ) {
@@ -156,7 +156,9 @@ test('Is handwarmer?', async () => {
         let game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toBe(false)
     }
+})
 
+test('Is handwarmer? (B)', async () => {
     const handwarmerDir = path.join(__dirname, '../../test_data/handwarmers/')
     const handwarmerFiles: string[] = await fs.promises.readdir(handwarmerDir);
     for(const filename of handwarmerFiles ) {
@@ -164,7 +166,9 @@ test('Is handwarmer?', async () => {
         let game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toBe(true)
     }
+})
 
+test('Is handwarmer? (C)', async () => {
     let data = fs.readFileSync(path.join(__dirname, '../../test_data/doubles_match_1.slp'), null);
     let game = new SlippiGame(toArrayBuffer(data))
     expect(isHandwarmer(game)).toBe(false)
@@ -172,5 +176,5 @@ test('Is handwarmer?', async () => {
 
 test('List checks', () => {
     let checks: Check[] = ListChecks()
-    expect(checks.length).toBe(3)
+    expect(checks.length).toBe(4)
 })

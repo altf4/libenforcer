@@ -8,6 +8,7 @@ import {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
 export {hasIllegalUptiltRounding} from './uptilt_rounding'
+export {hasIllegalSDI} from './sdi'
 export {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export * from './slippi'
 
