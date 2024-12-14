@@ -171,8 +171,8 @@ export function failsSDIRuleTwo(coords: Coord[]): boolean {
         }
 
         // Now look 5 frames ahead. Do we alternate between here and an adjacent cardinal?
-        let hitAdjacent: 0
-        let hitStart: 1
+        let hitAdjacent = 0
+        let hitStart = 1
         for (let j = 1; j <= 5 && (i+j) < regions.length; j++) {
             // Only count the region if we moved there from another region this frame
             if (regions[i+j] === regions[i+j-1]) {
