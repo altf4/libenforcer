@@ -4,6 +4,7 @@ import {hasDisallowedCStickCoords} from './disallowed_analog_values'
 import {hasIllegalTravelTime} from './travel_time'
 import {hasIllegalUptiltRounding} from './uptilt_rounding'
 import {hasIllegalCrouchUptilt} from './crouch_uptilt'
+import { hasIllegalSDI } from './sdi'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
@@ -32,7 +33,10 @@ export function ListChecks(): Check[] {
               })
   checks.push({name: "Fast Crouch Uptilt", 
               checkFunction: hasIllegalCrouchUptilt
-              })              
+              })
+  checks.push({name: "Illegal SDI", 
+              checkFunction: hasIllegalSDI
+    })
   return checks
 }
 
