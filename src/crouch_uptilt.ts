@@ -12,6 +12,9 @@ export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, co
     var frames = game.getFrames()
     let lastCrouch = -124
     for (let i = -123; i < game.getStats().lastFrame; i++) {
+        if (!(playerIndex in frames[i].players)) {
+            continue
+        }
         let actionState = frames[i].players[playerIndex].post.actionStateId
         // Crouching
         if (actionState == 0x28) {
