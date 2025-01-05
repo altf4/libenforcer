@@ -9,7 +9,7 @@ export function hasIllegalTravelTime(game: SlippiGame, playerIndex: number, coor
  
     // Box controllers should hit 36%
     //  TODO: Is 30% a reasonable cutoff? Maybe it should be lower?
-    if (averageTravelCoordHitRate(coords) < 0.30) {
+    if (averageTravelCoordHitRate(coords) < 0.25) {
         return true
     }
     
