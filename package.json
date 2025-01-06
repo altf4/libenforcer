@@ -1,6 +1,6 @@
 {
   "name": "slp-enforcer",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Finds violations of the Melee Controller Ruleset by inspecting SLP files",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
