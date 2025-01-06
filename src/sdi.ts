@@ -232,6 +232,10 @@ export function hasIllegalSDI(game: SlippiGame, playerIndex: number, coords: Coo
         return true
     } 
      
+    if (failsSDIRuleTwo(coords)) {
+        return true
+    } 
+
     if (failsSDIRuleThree(coords)) {
         return true
     }
