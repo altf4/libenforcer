@@ -4,7 +4,7 @@ import {hasDisallowedCStickCoords} from './disallowed_analog_values'
 import {hasIllegalTravelTime} from './travel_time'
 import {hasIllegalUptiltRounding} from './uptilt_rounding'
 import {hasIllegalCrouchUptilt} from './crouch_uptilt'
-import { hasIllegalSDI } from './sdi'
+import {hasIllegalSDI} from './sdi'
 
 export {hasDisallowedCStickCoords} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
@@ -13,9 +13,21 @@ export {hasIllegalSDI} from './sdi'
 export {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export * from './slippi'
 
+export class CheckResult {
+  result: boolean
+  metric: number // Usually a frame number, but can represent something else
+  reason: string
+
+  constructor(result: boolean, metric: number = -123, reason: string = "") {
+    this.result = result
+    this.metric = metric
+    this.reason = reason
+  }
+}
+
 export type Check = {
   name: string
-  checkFunction: (game: SlippiGame, playerIndex: number, coords: Coord[]) => boolean
+  checkFunction: (game: SlippiGame, playerIndex: number, coords: Coord[]) => CheckResult
 }
 
 // Provide an array of strings that describe the available Checks

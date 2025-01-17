@@ -1,5 +1,5 @@
 import {SlippiGame} from './slippi'
-import {Coord, isBoxController} from './index';
+import {Coord, CheckResult, isBoxController} from './index';
 
 export enum SDIRegion {
     DZ = 0,
@@ -120,7 +120,8 @@ export function isDiagonalAdjacent(regionA: SDIRegion, regionB: SDIRegion): bool
 }
   
 // Rapidly tapping the same direction and returning to neutral faster than once every 5.5 frames triggers 1 SDI and ignores subsequent attempts.
-export function failsSDIRuleOne(coords: Coord[]): boolean {
+// Returns: frame where infraction begins. null if no infraction
+export function failsSDIRuleOne(coords: Coord[]): number | null {
     // Pull out the region of every input
     var regions: SDIRegion[] = []
     for (let coord of coords) {
@@ -146,16 +147,17 @@ export function failsSDIRuleOne(coords: Coord[]): boolean {
                 lastRegion = regions[i+j]
             }
             if (sdi_count >= 2) {
-                return true
+                return i
             }
         }
     }
 
-    return false
+    return null
 }
 
 // Rapidly tapping the same diagonal and returning to an adjacent cardinal faster than once every 5.5 frames triggers 1 SDI and ignores subsequent attempts.
-export function failsSDIRuleTwo(coords: Coord[]): boolean {
+// Returns: frame where infraction begins. null if no infraction
+export function failsSDIRuleTwo(coords: Coord[]): number | null {
     // Pull out the region of every input
     var regions: SDIRegion[] = []
     for (let coord of coords) {
@@ -186,14 +188,15 @@ export function failsSDIRuleTwo(coords: Coord[]): boolean {
             }
         }
         if (hitAdjacent + hitStart >= 4) {
-            return true
+            return i
         }
     }
-    return false
+    return null
 }
 
 // Alternating between adjacent cardinals
-export function failsSDIRuleThree(coords: Coord[]): boolean {
+// Returns: frame where infraction begins. null if no infraction
+export function failsSDIRuleThree(coords: Coord[]): number | null {
     // Pull out the region of every input
     var regions: SDIRegion[] = []
     for (let coord of coords) {
@@ -213,32 +216,35 @@ export function failsSDIRuleThree(coords: Coord[]): boolean {
                 }
                 // Then returned back
                 if (hitAdjacent && (regions[j] === currentRegion)) {
-                    return true
+                    return i
                 }
             }
         }
     }
   
-    return false;
+    return null;
   }
 
-export function hasIllegalSDI(game: SlippiGame, playerIndex: number, coords: Coord[]) {
+export function hasIllegalSDI(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // If we're on analog, then it always passes
     if (!isBoxController(coords)) {
-        return false
+        return new CheckResult(false)
     }
 
-    if (failsSDIRuleOne(coords)) {
-        return true
+    let infractionFrame = failsSDIRuleOne(coords)
+    if (infractionFrame !== null) {
+        return new CheckResult(true, infractionFrame, "Violated SDI rule #1")
     } 
      
-    if (failsSDIRuleTwo(coords)) {
-        return true
+    infractionFrame = failsSDIRuleTwo(coords)
+    if (infractionFrame !== null) {
+        return new CheckResult(true, infractionFrame, "Violated SDI rule #2")
     } 
 
-    if (failsSDIRuleThree(coords)) {
-        return true
-    }
+    infractionFrame = failsSDIRuleThree(coords)
+    if (infractionFrame !== null) {
+        return new CheckResult(true, infractionFrame, "Violated SDI rule #3")
+    } 
 
-    return false
+    return new CheckResult(false)
 }

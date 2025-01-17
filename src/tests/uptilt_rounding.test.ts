@@ -13,8 +13,8 @@ test('Test uptilt rounding (legal analog)', async () => {
         let gameCoordsPortThree: Coord[] = getCoordListFromGame(game, 2, true)
         let gameCoordsPortFour: Coord[] = getCoordListFromGame(game, 3, true)
 
-        expect(hasIllegalUptiltRounding(game, 2, gameCoordsPortThree)).toBe(false)
-        expect(hasIllegalUptiltRounding(game, 3, gameCoordsPortFour)).toBe(false)
+        expect(hasIllegalUptiltRounding(game, 2, gameCoordsPortThree).result).toBe(false)
+        expect(hasIllegalUptiltRounding(game, 3, gameCoordsPortFour).result).toBe(false)
     }
 })
 
@@ -25,6 +25,6 @@ test('Test uptilt rounding (nonlegal analog)', async () => {
     expect(game).not.toBeNull()
     let gameCoordsPortOne: Coord[] = getCoordListFromGame(game, 0, true)
 
-    expect(hasIllegalUptiltRounding(game, 0, gameCoordsPortOne)).toBe(true)
+    expect(hasIllegalUptiltRounding(game, 0, gameCoordsPortOne).result).toBe(true)
 })
 

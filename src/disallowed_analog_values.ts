@@ -1,15 +1,15 @@
 import {SlippiGame} from './slippi'
-import {Coord, FloatEquals, isBoxController} from './index';
+import {Coord, FloatEquals, CheckResult} from './index';
 
-export function hasDisallowedCStickCoords(game: SlippiGame, playerIndex: number, coords: Coord[]): boolean {   
+export function hasDisallowedCStickCoords(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {   
     for (var coordinate of coords) {   
         if (FloatEquals(Math.abs(coordinate.x), 0.8)) {
-            return true
+            return new CheckResult(true)
         }
         if (FloatEquals(Math.abs(coordinate.x), 0.6625)) {
-            return true
+            return new CheckResult(true)
         }
     }
 
-    return false
+    return new CheckResult(false)
 }

@@ -10,7 +10,7 @@ test('Test Crouch Uptilt (nonlegal)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
-    expect(hasIllegalCrouchUptilt(game, 3, coords)).toBe(true)
+    expect(hasIllegalCrouchUptilt(game, 3, coords).result).toBe(true)
 })
 
 test('Test Crouch Uptilt (legal)', async () => {
@@ -19,7 +19,7 @@ test('Test Crouch Uptilt (legal)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 0, true)
 
-    expect(hasIllegalCrouchUptilt(game, 0, coords)).toBe(false)
+    expect(hasIllegalCrouchUptilt(game, 0, coords).result).toBe(false)
 })
 
 // Doubles sometimes has blank entries for players. Handle this without crashing
@@ -29,5 +29,5 @@ test('Test Crouch Uptilt (breaking?)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 0, true)
 
-    expect(hasIllegalCrouchUptilt(game, 0, coords)).toBe(false)
+    expect(hasIllegalCrouchUptilt(game, 0, coords).result).toBe(false)
 })

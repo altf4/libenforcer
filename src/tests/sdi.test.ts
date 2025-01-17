@@ -11,9 +11,9 @@ test('Test SDI from legal digital file', () => {
         expect(game).not.toBeNull()
         let gameCoords: Coord[] = getCoordListFromGame(game, 2, true)
 
-        expect(failsSDIRuleOne(gameCoords)).toBe(false)
+        expect(failsSDIRuleOne(gameCoords)).toBeNull()
 
-        expect(failsSDIRuleThree(gameCoords)).toBe(false)
+        expect(failsSDIRuleThree(gameCoords)).toBeNull()
 })
 
 
@@ -34,9 +34,9 @@ test('Test SDI (legal A)', async () => {
 
     // TODO: Re-enable these tests once we get an SLP that works
     // expect(hasIllegalSDI(game, 0, coords)).toBe(false)
-    expect(failsSDIRuleOne(coords)).toBe(false)
+    expect(failsSDIRuleOne(coords)).toBeNull()
     // expect(failsSDIRuleTwo(coords)).toBe(false)
-    expect(failsSDIRuleThree(coords)).toBe(false)
+    expect(failsSDIRuleThree(coords)).toBeNull()
 })
 
 test('Test SDI (legal B)', async () => {
@@ -47,9 +47,9 @@ test('Test SDI (legal B)', async () => {
 
     // TODO: Re-enable these tests once we get an SLP that works
     // expect(hasIllegalSDI(game, 0, coords)).toBe(false)
-    expect(failsSDIRuleOne(coords)).toBe(false)
+    expect(failsSDIRuleOne(coords)).toBeNull()
     // expect(failsSDIRuleTwo(coords)).toBe(false)
-    expect(failsSDIRuleThree(coords)).toBe(false)
+    expect(failsSDIRuleThree(coords)).toBeNull()
 })
 
 // TODO: This test case correctly fails. This appears to be a mistake in the controller firmware that allows too many SDI inputs
@@ -69,8 +69,8 @@ test('Test SDI (non legal A)', async () => {
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
     // Fails rule #1
-    expect(hasIllegalSDI(game, 3, coords)).toBe(true)
-    expect(failsSDIRuleOne(coords)).toBe(true)
+    expect(hasIllegalSDI(game, 3, coords).result).toBe(true)
+    expect(failsSDIRuleOne(coords)).toBe(138)
 })
 
 test('Test SDI (non legal B)', async () => {
@@ -79,7 +79,7 @@ test('Test SDI (non legal B)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
-    expect(failsSDIRuleTwo(coords)).toBe(true)
+    expect(failsSDIRuleTwo(coords)).toBe(135)
 })
 
 test('Test SDI (non legal C)', async () => {
@@ -89,7 +89,7 @@ test('Test SDI (non legal C)', async () => {
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
     // Fails rule #3 but not rule #1
-    expect(hasIllegalSDI(game, 3, coords)).toBe(true)
-    expect(failsSDIRuleOne(coords)).toBe(false)
-    expect(failsSDIRuleThree(coords)).toBe(true)
+    expect(hasIllegalSDI(game, 3, coords).result).toBe(true)
+    expect(failsSDIRuleOne(coords)).toBeNull()
+    expect(failsSDIRuleThree(coords)).toBe(156)
 })

@@ -1,10 +1,10 @@
 import {SlippiGame} from './slippi'
-import {Coord, isBoxController} from './index';
+import {Coord, isBoxController, CheckResult} from './index';
 
-export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, coords: Coord[]) {
+export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // If we're on analog, then it always passes
     if (!isBoxController(coords)) {
-        return false
+        return new CheckResult(false)
     }
 
     // For this one, we use a different strategy,
@@ -23,11 +23,10 @@ export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, co
         // Uptilt
         if (actionState == 0x38) {
             if (i - lastCrouch <= 3) {
-                return true
+                return new CheckResult(true, i, "Crouch-uptilt occurred within three frames")
             }
         }
     }
 
-    return false
+    return new CheckResult(false)
 }
-
