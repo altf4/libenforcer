@@ -13,15 +13,27 @@ export {hasIllegalSDI} from './sdi'
 export {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export * from './slippi'
 
+// Holds the overall results of a check against a single player on a single game
 export class CheckResult {
   result: boolean
+  violations: Violation[]
+
+  constructor(result: boolean, violations: Violation[] = []) {
+    this.result = result
+    this.violations = violations
+  }
+}
+
+// Represents a single violation of a rule
+export class Violation {
   metric: number // Usually a frame number, but can represent something else
   reason: string
+  evidence: any[] // optional
 
-  constructor(result: boolean, metric: number = -123, reason: string = "") {
-    this.result = result
+  constructor(metric: number, reason: string, evidence: any[] = []) {
     this.metric = metric
     this.reason = reason
+    this.evidence = evidence
   }
 }
 

@@ -1,5 +1,5 @@
 import {SlippiGame} from './slippi'
-import {Coord, isBoxController, isEqual, CheckResult} from './index';
+import {Coord, isBoxController, isEqual, CheckResult, Violation} from './index';
 
 export function hasIllegalTravelTime(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult{
     // If we're on analog, then it always passes
@@ -11,7 +11,7 @@ export function hasIllegalTravelTime(game: SlippiGame, playerIndex: number, coor
     //  TODO: Is 25% a reasonable cutoff? Maybe it should be lower?
     let travelCoordPercent = averageTravelCoordHitRate(coords)
     if (travelCoordPercent < 0.25) {
-        return new CheckResult(true, travelCoordPercent, "Fewer than 25% of coordinates had travel")
+        return new CheckResult(true, [new Violation(travelCoordPercent, "Fewer than 25% of coordinates had travel")])
     }
     
     return new CheckResult(false)

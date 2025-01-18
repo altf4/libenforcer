@@ -33,5 +33,5 @@ test('Test full game with disallowed C-stick value', () => {
     var game = new SlippiGame(toArrayBuffer(data))
     expect(game).toBeDefined()
     var gameCoords: Coord[] = getCoordListFromGame(game, 0, false)
-    expect(hasDisallowedCStickCoords(game, 0, gameCoords).result).toBe(true)
+    expect(hasDisallowedCStickCoords(game, 0, gameCoords).result).toEqual(true)
 })

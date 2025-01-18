@@ -7,7 +7,7 @@ describe("when calculating the in-game timer", () => {
       timerType: TimerType.DECREASING,
       startingTimerSeconds: null,
     });
-    expect(gameTimer).toBe("Unknown");
+    expect(gameTimer).toEqual("Unknown");
   });
 
   it("should support increasing timers", () => {
@@ -15,7 +15,7 @@ describe("when calculating the in-game timer", () => {
       timerType: TimerType.INCREASING,
       startingTimerSeconds: 0,
     });
-    expect(gameTimer).toBe("00:33.57");
+    expect(gameTimer).toEqual("00:33.57");
   });
 
   it("should support decreasing timers", () => {
@@ -24,7 +24,7 @@ describe("when calculating the in-game timer", () => {
       startingTimerSeconds: 180,
     });
 
-    expect(gameTimer).toBe("01:51.76");
+    expect(gameTimer).toEqual("01:51.76");
   });
 
   it("should support when the exact limit is hit", () => {
@@ -33,6 +33,6 @@ describe("when calculating the in-game timer", () => {
       startingTimerSeconds: 180,
     });
 
-    expect(gameTimer).toBe("00:00.00");
+    expect(gameTimer).toEqual("00:00.00");
   });
 });

@@ -1,5 +1,5 @@
 import {expect, test} from '@jest/globals';
-import {Coord, averageTravelCoordHitRate, SlippiGame, getCoordListFromGame, toArrayBuffer} from '../index';
+import {Coord, averageTravelCoordHitRate, SlippiGame, getCoordListFromGame, toArrayBuffer, hasIllegalTravelTime} from '../index';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -27,6 +27,7 @@ test('Test average travel time from legal digital file', () => {
         expect(game).not.toBeNull()
         let gameCoords: Coord[] = getCoordListFromGame(game, 2, true)
 
+        expect(hasIllegalTravelTime(game, 2, gameCoords).result).toEqual(false)
         expect(averageTravelCoordHitRate(gameCoords)).toBeGreaterThan(0.30)
     }
 })
@@ -40,6 +41,7 @@ test('Test average travel time from legal analog file', async () => {
         expect(game).not.toBeNull()
         let gameCoords: Coord[] = getCoordListFromGame(game, 2, true)
 
+        expect(hasIllegalTravelTime(game, 2, gameCoords).result).toEqual(false)
         expect(averageTravelCoordHitRate(gameCoords)).toBeGreaterThan(0.85)
     }
 })
@@ -53,6 +55,7 @@ test('Test average travel time from non-legal digital file', async () => {
         expect(game).not.toBeNull()
         let gameCoords: Coord[] = getCoordListFromGame(game, 3, true)
 
+        expect(hasIllegalTravelTime(game, 2, gameCoords).result).toEqual(true)
         expect(averageTravelCoordHitRate(gameCoords)).toBeLessThan(0.20)
     }
 })

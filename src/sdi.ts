@@ -1,5 +1,5 @@
 import {SlippiGame} from './slippi'
-import {Coord, CheckResult, isBoxController} from './index';
+import {Coord, CheckResult, Violation, isBoxController} from './index';
 
 export enum SDIRegion {
     DZ = 0,
@@ -120,10 +120,11 @@ export function isDiagonalAdjacent(regionA: SDIRegion, regionB: SDIRegion): bool
 }
   
 // Rapidly tapping the same direction and returning to neutral faster than once every 5.5 frames triggers 1 SDI and ignores subsequent attempts.
-// Returns: frame where infraction begins. null if no infraction
-export function failsSDIRuleOne(coords: Coord[]): number | null {
+// Returns: array of violations
+export function failsSDIRuleOne(coords: Coord[]): Violation[] {
     // Pull out the region of every input
-    var regions: SDIRegion[] = []
+    let violations: Violation[] = []
+    let regions: SDIRegion[] = []
     for (let coord of coords) {
         regions.push(getSDIRegion(coord.x, coord.y))
     }
@@ -147,19 +148,20 @@ export function failsSDIRuleOne(coords: Coord[]): number | null {
                 lastRegion = regions[i+j]
             }
             if (sdi_count >= 2) {
-                return i
+                violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i+6)))
             }
         }
     }
 
-    return null
+    return violations
 }
 
 // Rapidly tapping the same diagonal and returning to an adjacent cardinal faster than once every 5.5 frames triggers 1 SDI and ignores subsequent attempts.
-// Returns: frame where infraction begins. null if no infraction
-export function failsSDIRuleTwo(coords: Coord[]): number | null {
+// Returns: array of violations
+export function failsSDIRuleTwo(coords: Coord[]): Violation[] {
     // Pull out the region of every input
-    var regions: SDIRegion[] = []
+    let violations: Violation[] = []
+    let regions: SDIRegion[] = []
     for (let coord of coords) {
         regions.push(getSDIRegion(coord.x, coord.y))
     }
@@ -188,17 +190,18 @@ export function failsSDIRuleTwo(coords: Coord[]): number | null {
             }
         }
         if (hitAdjacent + hitStart >= 4) {
-            return i
+            violations.push(new Violation(i, "Failed SDI rule #2", coords.slice(i, i+6)))
         }
     }
-    return null
+    return violations
 }
 
 // Alternating between adjacent cardinals
-// Returns: frame where infraction begins. null if no infraction
-export function failsSDIRuleThree(coords: Coord[]): number | null {
+// Returns: array of violations
+export function failsSDIRuleThree(coords: Coord[]): Violation[] {
     // Pull out the region of every input
-    var regions: SDIRegion[] = []
+    let violations: Violation[] = []
+    let regions: SDIRegion[] = []
     for (let coord of coords) {
         regions.push(getSDIRegion(coord.x, coord.y))
     }
@@ -216,13 +219,13 @@ export function failsSDIRuleThree(coords: Coord[]): number | null {
                 }
                 // Then returned back
                 if (hitAdjacent && (regions[j] === currentRegion)) {
-                    return i
+                    violations.push(new Violation(i, "Failed SDI rule #3", coords.slice(i, i+6)))
                 }
             }
         }
     }
   
-    return null;
+    return violations;
   }
 
 export function hasIllegalSDI(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
@@ -231,19 +234,19 @@ export function hasIllegalSDI(game: SlippiGame, playerIndex: number, coords: Coo
         return new CheckResult(false)
     }
 
-    let infractionFrame = failsSDIRuleOne(coords)
-    if (infractionFrame !== null) {
-        return new CheckResult(true, infractionFrame, "Violated SDI rule #1")
+    let infractionFrames = failsSDIRuleOne(coords)
+    if (infractionFrames.length > 0) {
+        return new CheckResult(true, infractionFrames)
     } 
      
-    infractionFrame = failsSDIRuleTwo(coords)
-    if (infractionFrame !== null) {
-        return new CheckResult(true, infractionFrame, "Violated SDI rule #2")
+    infractionFrames = failsSDIRuleTwo(coords)
+    if (infractionFrames.length > 0) {
+        return new CheckResult(true, infractionFrames)
     } 
 
-    infractionFrame = failsSDIRuleThree(coords)
-    if (infractionFrame !== null) {
-        return new CheckResult(true, infractionFrame, "Violated SDI rule #3")
+    infractionFrames = failsSDIRuleThree(coords)
+    if (infractionFrames.length > 0) {
+        return new CheckResult(true, infractionFrames)
     } 
 
     return new CheckResult(false)

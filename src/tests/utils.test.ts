@@ -122,16 +122,16 @@ test('Parse replay file correctly', () => {
 
     var frames: FramesType = game.getFrames()
     for (let frame = -123; frame < 1111; frame++) {
-        expect(frames[frame].players[0]?.pre.frame).toBe(frame)
+        expect(frames[frame].players[0]?.pre.frame).toEqual(frame)
     }
 
-    expect(frames[500].players[0]?.post.internalCharacterId).toBe(0x0A)
+    expect(frames[500].players[0]?.post.internalCharacterId).toEqual(0x0A)
 })
 
 test('Process main stick inputs', () => {
 
-    expect(isEqual(processAnalogStick({x: 0, y: 0}, false), {x: 0, y: 0})).toBe(true)
-    expect(isEqual(processAnalogStick({x: 0, y: -80}, false), {x: 0, y: -1})).toBe(true)
+    expect(isEqual(processAnalogStick({x: 0, y: 0}, false), {x: 0, y: 0})).toEqual(true)
+    expect(isEqual(processAnalogStick({x: 0, y: -80}, false), {x: 0, y: -1})).toEqual(true)
 
     const data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G1.slp'), null);
     const game = new SlippiGame(toArrayBuffer(data))
@@ -144,7 +144,7 @@ test('Process main stick inputs', () => {
         let processedY = frames[frame].players[0]?.pre.joystickY
         let processedCoord = {x: processedX, y: processedY}
 
-        expect(isEqual(processedCoord, rawCoord)).toBe(true)
+        expect(isEqual(processedCoord, rawCoord)).toEqual(true)
     }
 })
 
@@ -154,7 +154,7 @@ test('Is handwarmer? (A)', async () => {
     for(const filename of files ) {
         let data = fs.readFileSync(path.join(slpDir, filename), null);
         let game = new SlippiGame(toArrayBuffer(data))
-        expect(isHandwarmer(game)).toBe(false)
+        expect(isHandwarmer(game)).toEqual(false)
     }
 })
 
@@ -164,17 +164,17 @@ test('Is handwarmer? (B)', async () => {
     for(const filename of handwarmerFiles ) {
         let data = fs.readFileSync(path.join(handwarmerDir, filename), null);
         let game = new SlippiGame(toArrayBuffer(data))
-        expect(isHandwarmer(game)).toBe(true)
+        expect(isHandwarmer(game)).toEqual(true)
     }
 })
 
 test('Is handwarmer? (C)', async () => {
     let data = fs.readFileSync(path.join(__dirname, '../../test_data/doubles_match_1.slp'), null);
     let game = new SlippiGame(toArrayBuffer(data))
-    expect(isHandwarmer(game)).toBe(false)
+    expect(isHandwarmer(game)).toEqual(false)
 })
 
 test('List checks', () => {
     let checks: Check[] = ListChecks()
-    expect(checks.length).toBe(5)
+    expect(checks.length).toEqual(5)
 })
