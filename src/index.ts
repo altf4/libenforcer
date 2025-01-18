@@ -6,7 +6,7 @@ import {hasIllegalUptiltRounding} from './uptilt_rounding'
 import {hasIllegalCrouchUptilt} from './crouch_uptilt'
 import {hasIllegalSDI} from './sdi'
 
-export {hasDisallowedCStickCoords} from './disallowed_analog_values'
+export {hasDisallowedCStickCoords, getCStickViolations} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
 export {hasIllegalUptiltRounding} from './uptilt_rounding'
 export {hasIllegalSDI} from './sdi'
