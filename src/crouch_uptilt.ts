@@ -8,9 +8,11 @@ export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, co
         return new CheckResult(false)
     }
 
+    let actions: number[] = []
+
     // For this one, we use a different strategy,
     //  we just look at the game states, rather than inputs
-    var frames = game.getFrames()
+    let frames = game.getFrames()
     let lastCrouch = -124
     for (let i = -123; i < game.getStats().lastFrame; i++) {
         if (!(playerIndex in frames[i].players)) {
@@ -24,7 +26,7 @@ export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, co
         // Uptilt
         if (actionState == 0x38) {
             if (i - lastCrouch <= 3) {
-                violations.push(new Violation(lastCrouch, "Crouch-uptilt occurred within three frames", coords.slice(lastCrouch, lastCrouch+i)))
+                violations.push(new Violation(lastCrouch, "Crouch-uptilt occurred within three frames", coords.slice(lastCrouch+123, lastCrouch+123+4)))
             }
         }
     }

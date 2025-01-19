@@ -10,7 +10,13 @@ test('Test Crouch Uptilt (nonlegal)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
-    expect(hasIllegalCrouchUptilt(game, 3, coords).result).toEqual(true)
+    let checkResult = hasIllegalCrouchUptilt(game, 3, coords)
+    expect(checkResult.result).toEqual(true)
+    expect(checkResult.violations.length).toEqual(6)
+
+    for (let violation of checkResult.violations) {
+        expect(violation.evidence[0]).toEqual({"x": 0, "y": -1})
+    }
 })
 
 test('Test Crouch Uptilt (legal)', async () => {
