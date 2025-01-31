@@ -45,12 +45,24 @@ test('Test SDI (legal B)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 0, true)
 
-    // TODO: Re-enable these tests once we get an SLP that works
-    // expect(hasIllegalSDI(game, 0, coords)).toEqual(false)
+    expect(hasIllegalSDI(game, 0, coords).result).toEqual(false)
     expect(failsSDIRuleOne(coords)).toEqual([])
-    // expect(failsSDIRuleTwo(coords)).toEqual(false)
+    expect(failsSDIRuleTwo(coords)).toEqual([])
     expect(failsSDIRuleThree(coords)).toEqual([])
 })
+
+test('Test SDI (legal B)', async () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/sdi/sdi_mash.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let coords: Coord[] = getCoordListFromGame(game, 0, true)
+
+    expect(hasIllegalSDI(game, 0, coords).result).toEqual(false)
+    expect(failsSDIRuleOne(coords)).toEqual([])
+    expect(failsSDIRuleTwo(coords)).toEqual([])
+    expect(failsSDIRuleThree(coords)).toEqual([])
+})
+
 
 // TODO: This test case correctly fails. This appears to be a mistake in the controller firmware that allows too many SDI inputs
 // test('Test SDI (legal C)', async () => {
@@ -85,10 +97,10 @@ test('Test SDI (non legal B)', async () => {
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
     let violations: Violation[] = failsSDIRuleTwo(coords)
-    expect(violations.length).toEqual(47)
+    expect(violations.length).toEqual(48)
     expect(violations[10].reason).toEqual("Failed SDI rule #2")
-    expect(violations[10].metric).toEqual(227)
-    expect(violations[10].evidence).toEqual([{"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}])
+    expect(violations[10].metric).toEqual(226)
+    expect(violations[10].evidence).toEqual([{"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}])
 })
 
 test('Test SDI (non legal C)', async () => {

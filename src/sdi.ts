@@ -14,7 +14,8 @@ export enum SDIRegion {
 }
 
 const DIAGONALS = [SDIRegion.NE, SDIRegion.SE, SDIRegion.NW, SDIRegion.SW]
-  
+const CARDINALS = [SDIRegion.N, SDIRegion.E, SDIRegion.S, SDIRegion.W]
+
 export function getSDIRegion(x: number, y: number): SDIRegion {
     let region = SDIRegion.DZ;
 
@@ -134,15 +135,15 @@ export function failsSDIRuleOne(coords: Coord[]): Violation[] {
         if (region === SDIRegion.DZ) {
             let lastRegion: SDIRegion = SDIRegion.DZ
             let sdi_count: number = 0
-            let firstRegion: SDIRegion = null
+            let firstSDIRegion: SDIRegion = null
             for (let j = 1; j <= 5 && (i+j) < regions.length; j++) {
                 // Get the first SDI region
-                if (regions[i+j] !== SDIRegion.DZ && firstRegion === null) {
-                    firstRegion = regions[i+j]
+                if (regions[i+j] !== SDIRegion.DZ && firstSDIRegion === null) {
+                    firstSDIRegion = regions[i+j]
                 }
-                // If we went from DZ to anywhere. 
+                // If we went from DZ to the first SDI region. 
                 // ie: Last region was the deadzone, current region is the starting point
-                if (lastRegion === SDIRegion.DZ && regions[i+j] === firstRegion) {
+                if (lastRegion === SDIRegion.DZ && regions[i+j] === firstSDIRegion) {
                     sdi_count++
                 }
                 lastRegion = regions[i+j]
@@ -167,29 +168,32 @@ export function failsSDIRuleTwo(coords: Coord[]): Violation[] {
     }
     
     for (let i = 0; i < regions.length; i++) {
-        const currentRegion = regions[i];
+        const startingRegion = regions[i];
 
-        // Start from a diagonal
-        if (!DIAGONALS.includes(currentRegion)) {
+        // Start from a cardinal
+        if (!CARDINALS.includes(startingRegion)) {
             continue
         }
 
-        // Now look 5 frames ahead. Do we alternate between here and an adjacent cardinal?
-        let hitAdjacent = 0
-        let hitStart = 1
+        // Now look 5 frames ahead. 
+        // Do we alternate between here and an adjacent diagonal twice?
+        let sdiCount = 0
+        let adjacentCardinalRegion = -1
         for (let j = 1; j <= 5 && (i+j) < regions.length; j++) {
-            // Only count the region if we moved there from another region this frame
+            // Ignore if we haven't moved regions
             if (regions[i+j] === regions[i+j-1]) {
                 continue
             }
-            if (isRegionAdjacent(currentRegion, regions[i+j])) {
-                hitAdjacent++
-            }
-            if (currentRegion === regions[i+j]) {
-                hitStart++
+
+            // Have we hit the diagonal SDI? (an adjacent diagonal)
+            if (isRegionAdjacent(startingRegion, regions[i+j]) && DIAGONALS.includes(regions[i+j])) {
+                if (adjacentCardinalRegion === -1 || adjacentCardinalRegion === regions[i+j]) {
+                    adjacentCardinalRegion = regions[i+j]
+                    sdiCount++
+                }
             }
         }
-        if (hitAdjacent + hitStart >= 4) {
+        if (sdiCount >= 2) {
             violations.push(new Violation(i, "Failed SDI rule #2", coords.slice(i, i+6)))
         }
     }
