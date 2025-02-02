@@ -53,6 +53,15 @@ test('Get unique coords', () => {
     expect(targets.length).toEqual(5)
 })
 
+test('Is box inputs? Pikachu game', () => {
+    // Game 1. Read from an SLP file now. Confirmed box player
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/should_count_as_box/Game_20250201T124602.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
+    expect(isBoxController(gameCoords)).toEqual(true)
+})
+
 test('Is box inputs?', () => {
     // Game 1. Read from an SLP file now. Confirmed box player
     var data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G1.slp'), null);

@@ -270,13 +270,18 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
 export function isBoxController(coordinates: Coord[]): boolean {
   var targets = getTargetCoords(coordinates)
   var deadCenter: Coord = {x: 0, y: 0}
-  // If we get a non-zero target coord in the deadzone, then it's def analog
+  // If we get two non-zero target coords in the deadzone, then it's def analog
   //  NOTE: The opposite is not true. It's normal to have an analog controller 
   //    sometimes only register targets at 0,0
+  let dzTargetCount: number = 0
   for (let target of targets) {
     if (!isEqual(target, deadCenter) && (getJoystickRegion(target.x, target.y) === JoystickRegion.DZ)) {
-      return false
+      dzTargetCount++
     }
+  }
+
+  if (dzTargetCount >= 2) {
+    return false
   }
 
   // Is the overall gamewide unique coords/sec rate > 5?
