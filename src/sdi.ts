@@ -11,33 +11,47 @@ export enum SDIRegion {
     E = 6,
     S = 7,
     W = 8,
+    TILT = 9,
 }
 
 const DIAGONALS = [SDIRegion.NE, SDIRegion.SE, SDIRegion.NW, SDIRegion.SW]
 const CARDINALS = [SDIRegion.N, SDIRegion.E, SDIRegion.S, SDIRegion.W]
 
 export function getSDIRegion(x: number, y: number): SDIRegion {
-    let region = SDIRegion.DZ;
-
-    if (x >= 0.2875 && y >= 0.2875) {
-        region = SDIRegion.NE;
-    } else if (x >= 0.2875 && y <= -0.2875) {
-        region = SDIRegion.SE;
-    } else if (x <= -0.2875 && y <= -0.2875) {
-        region = SDIRegion.SW;
-    } else if (x <= -0.2875 && y >= 0.2875) {
-        region = SDIRegion.NW;
-    } else if (y >= 0.2875) {
-        region = SDIRegion.N;
-    } else if (x >= 0.7) {
-        region = SDIRegion.E;
-    } else if (y <= -0.7) {
-        region = SDIRegion.S;
-    } else if (x <= -0.7) {
-        region = SDIRegion.W;
+    if (Math.abs(x) <= 0.2875 && Math.abs(y) <= 0.2875) {
+        return SDIRegion.DZ
     }
 
-    return region;
+    let magnitude = Math.sqrt(x**2 + y**2)
+
+    if (x >= 0.2875 && y >= 0.2875 && magnitude >= 0.7) {
+        return SDIRegion.NE
+    }
+    if (x >= 0.2875 && y <= -0.2875 && magnitude >= 0.7) {
+        return SDIRegion.SE
+    } 
+    if (x <= -0.2875 && y <= -0.2875 && magnitude >= 0.7) {
+        return SDIRegion.SW
+    } 
+    if (x <= -0.2875 && y >= 0.2875 && magnitude >= 0.7) {
+        return SDIRegion.NW
+    }
+    // Magnitude must be >=0.7 for these 4 if the condition is true. No need to check it
+    if (y >= 0.7) {
+        return SDIRegion.N
+    } 
+    if (x >= 0.7) {
+        return SDIRegion.E
+    } 
+    if (y <= -0.7) {
+        return SDIRegion.S
+    } 
+    if (x <= -0.7) {
+        return SDIRegion.W
+    }
+
+    // Only place left
+    return SDIRegion.TILT
 }
 
 // Directly adjacent
@@ -131,25 +145,40 @@ export function failsSDIRuleOne(coords: Coord[]): Violation[] {
     }
 
     for (let [i, region] of regions.entries()) {
-        // Look ahead 5 frames to see if we hit two SDIs from neutral
+        // Look ahead 10 frames to see if we hit two SDIs from neutral
         if (region === SDIRegion.DZ) {
             let lastRegion: SDIRegion = SDIRegion.DZ
-            let sdi_count: number = 0
             let firstSDIRegion: SDIRegion = null
-            for (let j = 1; j <= 5 && (i+j) < regions.length; j++) {
-                // Get the first SDI region
-                if (regions[i+j] !== SDIRegion.DZ && firstSDIRegion === null) {
-                    firstSDIRegion = regions[i+j]
+            let lastSDIFrame: number = -1000
+            let consecutiveTiltFrames = 0
+            let hasTouchedDZ: boolean = true // You have to touch the deadzone in order for an SDI to count
+            for (let j = 1; j <= 10 && (i+j) < regions.length; j++) {
+                if (regions[i+j] === SDIRegion.DZ) {
+                    hasTouchedDZ = true
+                }
+                if (regions[i+j] === SDIRegion.TILT) {
+                    consecutiveTiltFrames += 1
+                } else {
+                    // Get the first SDI region
+                    if (regions[i+j] !== SDIRegion.DZ && firstSDIRegion === null) {
+                        firstSDIRegion = regions[i+j]
+                    }
                 }
                 // If we went from DZ to the first SDI region. 
-                // ie: Last region was the deadzone, current region is the starting point
-                if (lastRegion === SDIRegion.DZ && regions[i+j] === firstSDIRegion) {
-                    sdi_count++
+                // And we also haven't spent more than 3 consecutive frames in the tilt zone
+                if (hasTouchedDZ && [SDIRegion.DZ, SDIRegion.TILT].includes(lastRegion) && regions[i+j] === firstSDIRegion && consecutiveTiltFrames <= 3) {
+                    if (i+j <= lastSDIFrame + 5){
+                        // Two SDI frames were less than 6 frames away from each other!
+                        violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i+9)))
+                    }
+                    lastSDIFrame = i+j
+                    hasTouchedDZ = false // Reset the DZ counter
                 }
                 lastRegion = regions[i+j]
-            }
-            if (sdi_count >= 2) {
-                violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i+6)))
+
+                if (regions[i+j] !== SDIRegion.TILT) {
+                    consecutiveTiltFrames = 0
+                }
             }
         }
     }
