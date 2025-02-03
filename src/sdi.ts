@@ -169,7 +169,7 @@ export function failsSDIRuleOne(coords: Coord[]): Violation[] {
                 if (hasTouchedDZ && [SDIRegion.DZ, SDIRegion.TILT].includes(lastRegion) && regions[i+j] === firstSDIRegion && consecutiveTiltFrames <= 3) {
                     if (i+j <= lastSDIFrame + 5){
                         // Two SDI frames were less than 6 frames away from each other!
-                        violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i+9)))
+                        violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i+10)))
                     }
                     lastSDIFrame = i+j
                     hasTouchedDZ = false // Reset the DZ counter
