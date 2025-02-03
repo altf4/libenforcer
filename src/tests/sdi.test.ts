@@ -101,7 +101,7 @@ test('Test SDI (manual coords)', async () => {
     expect(failsSDIRuleOne(coords)).toEqual([])
 
     // Staggered SDIs. Does count as a violation! (slowest possible)
-    coords = [{x: 0, y: 0}, {x: 0.3, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0.3, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}]
+    coords = [{x: 0, y: 0}, {x: 0.3, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}]
     expect(failsSDIRuleOne(coords).length).toEqual(1)
 
     // Polled in the tilt zone. Still a violation
@@ -171,10 +171,10 @@ test('Test SDI (non legal A)', async () => {
     expect(hasIllegalSDI(game, 3, coords).result).toEqual(true)
 
     let violations: Violation[] = failsSDIRuleOne(coords)
-    expect(violations.length).toEqual(212)
+    expect(violations.length).toEqual(195)
     expect(violations[10].reason).toEqual("Failed SDI rule #1")
-    expect(violations[10].metric).toEqual(138)
-    expect(violations[10].evidence).toEqual([{"x": 0, "y": 0}, {"x": 0, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}])
+    expect(violations[10].metric).toEqual(139)
+    expect(violations[10].evidence).toEqual([{"x": 0, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}])
 })
 
 test('Test SDI (non legal B)', async () => {
@@ -184,10 +184,10 @@ test('Test SDI (non legal B)', async () => {
     let coords: Coord[] = getCoordListFromGame(game, 3, true)
 
     let violations: Violation[] = failsSDIRuleTwo(coords)
-    expect(violations.length).toEqual(48)
+    expect(violations.length).toEqual(36)
     expect(violations[10].reason).toEqual("Failed SDI rule #2")
     expect(violations[10].metric).toEqual(226)
-    expect(violations[10].evidence).toEqual([{"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}])
+    expect(violations[10].evidence).toEqual([{"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}])
 })
 
 test('Test SDI (non legal C)', async () => {
@@ -201,8 +201,8 @@ test('Test SDI (non legal C)', async () => {
     expect(failsSDIRuleOne(coords)).toEqual([])
     
     let violations: Violation[] = failsSDIRuleThree(coords)
-    expect(violations.length).toEqual(27)
-    expect(violations[10].reason).toEqual("Failed SDI rule #3")
-    expect(violations[10].metric).toEqual(1659)
-    expect(violations[10].evidence).toEqual([{"x": 0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}, {"x": 0, "y": 1}, {"x": -0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}])
+    expect(violations.length).toEqual(8)
+    expect(violations[4].reason).toEqual("Failed SDI rule #3")
+    expect(violations[4].metric).toEqual(2535)
+    expect(violations[4].evidence).toEqual([{"x": 0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}, {"x": 0, "y": 1}, {"x": -0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}])
 })

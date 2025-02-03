@@ -152,7 +152,7 @@ export function failsSDIRuleOne(coords: Coord[]): Violation[] {
             let lastSDIFrame: number = -1000
             let consecutiveTiltFrames = 0
             let hasTouchedDZ: boolean = true // You have to touch the deadzone in order for an SDI to count
-            for (let j = 1; j <= 10 && (i+j) < regions.length; j++) {
+            for (let j = 1; j <= 9 && (i+j) < regions.length; j++) {
                 if (regions[i+j] === SDIRegion.DZ) {
                     hasTouchedDZ = true
                 }
@@ -167,8 +167,8 @@ export function failsSDIRuleOne(coords: Coord[]): Violation[] {
                 // If we went from DZ to the first SDI region. 
                 // And we also haven't spent more than 3 consecutive frames in the tilt zone
                 if (hasTouchedDZ && [SDIRegion.DZ, SDIRegion.TILT].includes(lastRegion) && regions[i+j] === firstSDIRegion && consecutiveTiltFrames <= 3) {
-                    if (i+j <= lastSDIFrame + 5){
-                        // Two SDI frames were less than 6 frames away from each other!
+                    if (i+j <= lastSDIFrame + 4){
+                        // Two SDI frames were less than 5 frames away from each other!
                         violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i+10)))
                     }
                     lastSDIFrame = i+j
@@ -204,11 +204,11 @@ export function failsSDIRuleTwo(coords: Coord[]): Violation[] {
             continue
         }
 
-        // Now look 5 frames ahead. 
+        // Now look 4 frames ahead. 
         // Do we alternate between here and an adjacent diagonal twice?
         let sdiCount = 0
         let adjacentCardinalRegion = -1
-        for (let j = 1; j <= 5 && (i+j) < regions.length; j++) {
+        for (let j = 1; j <= 4 && (i+j) < regions.length; j++) {
             // Ignore if we haven't moved regions
             if (regions[i+j] === regions[i+j-1]) {
                 continue
@@ -223,7 +223,7 @@ export function failsSDIRuleTwo(coords: Coord[]): Violation[] {
             }
         }
         if (sdiCount >= 2) {
-            violations.push(new Violation(i, "Failed SDI rule #2", coords.slice(i, i+6)))
+            violations.push(new Violation(i, "Failed SDI rule #2", coords.slice(i, i+5)))
         }
     }
     return violations
@@ -243,16 +243,16 @@ export function failsSDIRuleThree(coords: Coord[]): Violation[] {
         const currentRegion = regions[i];
 
         if (DIAGONALS.includes(currentRegion)) {
-            // Look forward 5 frames to see if it goes to an adjacent diagonal and back 
+            // Look forward 4 frames to see if it goes to an adjacent diagonal and back 
             var hitAdjacent = false
-            for (let j = i + 1; j <= i + 5 && j < regions.length; j++) {
+            for (let j = i + 1; j <= i + 4 && j < regions.length; j++) {
                 // Hit the adjacent
                 if (isDiagonalAdjacent(regions[j], currentRegion)) {
                     hitAdjacent = true
                 }
                 // Then returned back
                 if (hitAdjacent && (regions[j] === currentRegion)) {
-                    violations.push(new Violation(i, "Failed SDI rule #3", coords.slice(i, i+6)))
+                    violations.push(new Violation(i, "Failed SDI rule #3", coords.slice(i, i+5)))
                 }
             }
         }
