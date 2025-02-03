@@ -1,5 +1,5 @@
 import {expect, test} from '@jest/globals';
-import {Coord, hasIllegalUptiltRounding, SlippiGame, getCoordListFromGame, toArrayBuffer} from '../index';
+import {Coord, hasIllegalUptiltRounding, SlippiGame, getCoordListFromGame, toArrayBuffer, CheckResult} from '../index';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -25,6 +25,7 @@ test('Test uptilt rounding (nonlegal analog)', async () => {
     expect(game).not.toBeNull()
     let gameCoordsPortOne: Coord[] = getCoordListFromGame(game, 0, true)
 
-    expect(hasIllegalUptiltRounding(game, 0, gameCoordsPortOne).result).toEqual(true)
+    let checkResult: CheckResult = hasIllegalUptiltRounding(game, 0, gameCoordsPortOne)
+    expect(checkResult.result).toEqual(true)
+    expect(checkResult.violations.length).toBeGreaterThanOrEqual(1)
 })
-

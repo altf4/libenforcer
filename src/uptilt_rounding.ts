@@ -1,5 +1,5 @@
 import {SlippiGame} from './slippi'
-import {Coord, isBoxController, CheckResult, Violation} from './index';
+import {Coord, getUniqueCoords, isBoxController, CheckResult, Violation} from './index';
 
 export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // If we're on ditigal, then it always passes
@@ -14,6 +14,6 @@ export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, 
             return new CheckResult(false)
         }
     }
-    // TODO: Maybe we should insert all coords here as evidence, for visualization
-    return new CheckResult(true, [new Violation(0, "Uptilt rounding observed. No coordinates seen below uptilt area.")])
+    // Insert all coords here as evidence, for visualization
+    return new CheckResult(true, [new Violation(0, "Uptilt rounding observed. No coordinates seen below uptilt area.", getUniqueCoords(coords))])
 }
