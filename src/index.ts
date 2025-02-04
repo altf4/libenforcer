@@ -5,12 +5,15 @@ import {hasIllegalTravelTime} from './travel_time'
 import {hasIllegalUptiltRounding} from './uptilt_rounding'
 import {hasIllegalCrouchUptilt} from './crouch_uptilt'
 import {hasIllegalSDI} from './sdi'
+import {controlStickViz} from './control_stick_viz'
 
 export {hasDisallowedCStickCoords, getCStickViolations} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
 export {hasIllegalUptiltRounding} from './uptilt_rounding'
 export {hasIllegalSDI} from './sdi'
 export {hasIllegalCrouchUptilt} from './crouch_uptilt'
+export {controlStickViz} from './control_stick_viz'
+
 export * from './slippi'
 
 // Holds the overall results of a check against a single player on a single game
@@ -60,7 +63,11 @@ export function ListChecks(): Check[] {
               })
   checks.push({name: "Illegal SDI", 
               checkFunction: hasIllegalSDI
-    })
+              })
+  checks.push({name: "Control Stick Visualization", 
+              checkFunction: controlStickViz
+              })
+
   return checks
 }
 
