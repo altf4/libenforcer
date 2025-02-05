@@ -6,6 +6,8 @@ import {hasIllegalUptiltRounding} from './uptilt_rounding'
 import {hasIllegalCrouchUptilt} from './crouch_uptilt'
 import {hasIllegalSDI} from './sdi'
 import {controlStickViz} from './control_stick_viz'
+import {CStickViz} from './c_stick_viz'
+
 
 export {hasDisallowedCStickCoords, getCStickViolations} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
@@ -13,6 +15,8 @@ export {hasIllegalUptiltRounding} from './uptilt_rounding'
 export {hasIllegalSDI} from './sdi'
 export {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export {controlStickViz} from './control_stick_viz'
+export {CStickViz} from './c_stick_viz'
+
 
 export * from './slippi'
 
@@ -66,6 +70,9 @@ export function ListChecks(): Check[] {
               })
   checks.push({name: "Control Stick Visualization", 
               checkFunction: controlStickViz
+              })
+  checks.push({name: "C-Stick Visualization",
+              checkFunction: CStickViz
               })
 
   return checks
