@@ -185,5 +185,5 @@ test('Is handwarmer? (C)', async () => {
 
 test('List checks', () => {
     let checks: Check[] = ListChecks()
-    expect(checks.length).toEqual(6)
+    expect(checks.length).toEqual(7)
 })

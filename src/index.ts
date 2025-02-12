@@ -5,12 +5,14 @@ import {hasIllegalTravelTime} from './travel_time'
 import {hasIllegalUptiltRounding} from './uptilt_rounding'
 import {hasIllegalCrouchUptilt} from './crouch_uptilt'
 import {hasIllegalSDI} from './sdi'
+import {isGoomwave} from './goomwave'
 import {controlStickViz} from './control_stick_viz'
 
 export {hasDisallowedCStickCoords, getCStickViolations} from './disallowed_analog_values'
 export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
 export {hasIllegalUptiltRounding} from './uptilt_rounding'
 export {hasIllegalSDI} from './sdi'
+export {isGoomwave} from './goomwave'
 export {hasIllegalCrouchUptilt} from './crouch_uptilt'
 export {controlStickViz} from './control_stick_viz'
 
@@ -64,10 +66,15 @@ export function ListChecks(): Check[] {
   checks.push({name: "Illegal SDI", 
               checkFunction: hasIllegalSDI
               })
+  checks.push({name: "GoomWave Clamping", 
+              checkFunction: isGoomwave
+              })              
   checks.push({name: "Control Stick Visualization", 
               checkFunction: controlStickViz
               })
 
+
+              
   return checks
 }
 
