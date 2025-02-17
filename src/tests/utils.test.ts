@@ -104,7 +104,7 @@ test('Is box inputs?', () => {
     expect(isBoxController(gameCoords)).toEqual(true)
 
     // Confirmed GCC player
-    data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/Game_8C56C529AEAA_20231022T181554.slp'), null);
+    data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/traveltime/Game_8C56C529AEAA_20231022T181554.slp'), null);
     var game = new SlippiGame(toArrayBuffer(data))
     expect(game).not.toBeNull()
     var gameCoords: Coord[] = getCoordListFromGame(game, 3, true)
@@ -122,6 +122,23 @@ test('Is box inputs? Potion dataset', () => {
         let gameCoords: Coord[] = getCoordListFromGame(game, 2, true)
         expect(isBoxController(gameCoords)).toEqual(true)
     }
+})
+
+
+test('Is box inputs? xbox controller A', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/xbox_p2/Game_20250209T181347.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
+
+test('Is box inputs? xbox controller B', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/xbox_p2/Game_20250209T183921.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
 })
 
 test('Parse replay file correctly', () => {

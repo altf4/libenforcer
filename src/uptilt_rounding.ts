@@ -1,5 +1,5 @@
 import {SlippiGame} from './slippi'
-import {Coord, getUniqueCoords, isBoxController, CheckResult, Violation} from './index';
+import {Coord, getUniqueCoords, isBoxController, CheckResult, Violation, FloatEquals} from './index';
 
 export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // If we're on ditigal, then it always passes
@@ -14,6 +14,18 @@ export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, 
             return new CheckResult(false)
         }
     }
+
+    // Now let's count up how many coords in the uptilt zone are on the exact boundary
+    let boundaryCount: number = 0
+    for (let coord of coords) {
+        if (Math.abs(coord.x) < 0.2876 && FloatEquals(coord.y, 0.2875)) {
+            boundaryCount++
+        }
+    }
+    if (boundaryCount < 5) {
+        return new CheckResult(false)
+    }
+
     // Insert all coords here as evidence, for visualization
     return new CheckResult(true, [new Violation(0, "Uptilt rounding observed. No coordinates seen below uptilt area.", getUniqueCoords(coords))])
 }

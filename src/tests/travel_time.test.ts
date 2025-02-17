@@ -33,7 +33,7 @@ test('Test average travel time from legal digital file', () => {
 })
 
 test('Test average travel time from legal analog file', async () => {
-    const slpDir = path.join(__dirname, '../../test_data/legal/analog/')
+    const slpDir = path.join(__dirname, '../../test_data/legal/analog/traveltime/')
     const files: string[] = await fs.promises.readdir(slpDir);
     for(const filename of files ) {
         var data = fs.readFileSync(path.join(slpDir, filename), null);

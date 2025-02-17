@@ -37,7 +37,7 @@ test('Test full game with disallowed C-stick value', () => {
 })
 
 test('Test full game with analog controller, should pass', () => {
-    let data: Buffer = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/Game_8C56C529AEAA_20231022T181554.slp'), null)
+    let data: Buffer = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/traveltime/Game_8C56C529AEAA_20231022T181554.slp'), null)
     let game = new SlippiGame(toArrayBuffer(data))
     expect(game).toBeDefined()
     let gameCoords: Coord[] = getCoordListFromGame(game, 3, false)
