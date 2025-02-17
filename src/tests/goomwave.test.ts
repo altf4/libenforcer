@@ -13,7 +13,7 @@ test('Test isGoomwave (negative)', () => {
     }
 })
 
-test('Test isGoomwave (positive)', async () => {
+test('Test isGoomwave A (positive)', async () => {
     let data = fs.readFileSync(path.join(__dirname, '../../test_data/nonlegal/analog/goomwave_uptilt_p1.slp'), null)
     let game = new SlippiGame(toArrayBuffer(data))
     expect(game).not.toBeNull()
@@ -22,3 +22,21 @@ test('Test isGoomwave (positive)', async () => {
     expect(isGoomwave(game, 0, coords).result).toEqual(true)
 })
 
+
+test('Test isGoomwave B (positive)', async () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/nonlegal/analog/goomwave/Game_20250216T194607.slp'), null)
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let coords: Coord[] = getCoordListFromGame(game, 1, true)
+
+    expect(isGoomwave(game, 1, coords).result).toEqual(true)
+})
+
+test('Test isGoomwave C (positive)', async () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/nonlegal/analog/goomwave/Game_20250216T194746.slp'), null)
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let coords: Coord[] = getCoordListFromGame(game, 1, true)
+
+    expect(isGoomwave(game, 1, coords).result).toEqual(true)
+})
