@@ -1,5 +1,5 @@
-import {expect, test} from '@jest/globals';
-import {Coord, controlStickViz, SlippiGame, getCoordListFromGame, toArrayBuffer, CheckResult} from '../index';
+import { expect, test } from '@jest/globals';
+import { Coord, controlStickViz, SlippiGame, getCoordListFromGame, toArrayBuffer, CheckResult } from '../index';
 import * as fs from 'fs';
 import * as path from 'path';
 

@@ -1,5 +1,5 @@
-import {SlippiGame} from './slippi'
-import {Coord, getUniqueCoords, isBoxController, CheckResult, Violation, FloatEquals} from './index';
+import { SlippiGame } from './slippi'
+import { Coord, getUniqueCoords, isBoxController, CheckResult, Violation, FloatEquals } from './index';
 
 export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // If we're on ditigal, then it always passes

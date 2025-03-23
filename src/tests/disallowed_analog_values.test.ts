@@ -1,29 +1,29 @@
-import {expect, test} from '@jest/globals';
-import {Coord, SlippiGame, getCoordListFromGame, hasDisallowedCStickCoords, toArrayBuffer, getCStickViolations, isBoxController} from '../index';
+import { expect, test } from '@jest/globals';
+import { Coord, SlippiGame, getCoordListFromGame, hasDisallowedCStickCoords, toArrayBuffer, getCStickViolations, isBoxController } from '../index';
 import * as fs from 'fs';
 import * as path from 'path';
 
 test('Should pass check for disallowed C-Stick values', () => {
     let coords: Coord[] = []
-    coords.push({x: 0, y: 0})
-    coords.push({x: 1, y: 1})
-    
+    coords.push({ x: 0, y: 0 })
+    coords.push({ x: 1, y: 1 })
+
     const result = getCStickViolations(coords)
     expect(result.length).toEqual(0);
 })
 
 test('Should trigger check for disallowed C-Stick values', () => {
     let coords: Coord[] = []
-    coords.push({x: 0.8, y: 0})
-    
+    coords.push({ x: 0.8, y: 0 })
+
     const result = getCStickViolations(coords)
     expect(result.length).toEqual(1);
 })
 
 test('Should trigger check for disallowed C-Stick values', () => {
     let coords: Coord[] = []
-    coords.push({x: 0.6625, y: 0})
-    
+    coords.push({ x: 0.6625, y: 0 })
+
     const result = getCStickViolations(coords)
     expect(result.length).toEqual(1);
 })

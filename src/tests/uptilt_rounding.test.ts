@@ -1,12 +1,12 @@
-import {expect, test} from '@jest/globals';
-import {Coord, hasIllegalUptiltRounding, SlippiGame, getCoordListFromGame, toArrayBuffer, CheckResult} from '../index';
+import { expect, test } from '@jest/globals';
+import { Coord, hasIllegalUptiltRounding, SlippiGame, getCoordListFromGame, toArrayBuffer, CheckResult } from '../index';
 import * as fs from 'fs';
 import * as path from 'path';
 
 test('Test uptilt rounding (legal analog A)', async () => {
     const slpDir = path.join(__dirname, '../../test_data/legal/analog/traveltime/')
     const files: string[] = await fs.promises.readdir(slpDir);
-    for(const filename of files ) {
+    for (const filename of files) {
         var data = fs.readFileSync(path.join(slpDir, filename), null);
         let game = new SlippiGame(toArrayBuffer(data))
         expect(game).not.toBeNull()

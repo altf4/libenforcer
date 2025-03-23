@@ -1,5 +1,5 @@
-import {SlippiGame} from './slippi'
-import {Coord, isBoxController, CheckResult, Violation} from './index';
+import { SlippiGame } from './slippi'
+import { Coord, isBoxController, CheckResult, Violation } from './index';
 
 export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     let violations: Violation[] = []
@@ -26,7 +26,7 @@ export function hasIllegalCrouchUptilt(game: SlippiGame, playerIndex: number, co
         // Uptilt
         if (actionState == 0x38) {
             if (i - lastCrouch <= 3) {
-                violations.push(new Violation(lastCrouch, "Crouch-uptilt occurred within three frames", coords.slice(lastCrouch+123, lastCrouch+123+4)))
+                violations.push(new Violation(lastCrouch, "Crouch-uptilt occurred within three frames", coords.slice(lastCrouch + 123, lastCrouch + 123 + 4)))
             }
         }
     }

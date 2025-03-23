@@ -1,5 +1,5 @@
-import {expect, test} from '@jest/globals';
-import {FloatEquals, getTargetCoords, getUniqueCoords, isBoxController, Coord, SlippiGame, FramesType, getCoordListFromGame, toArrayBuffer, processAnalogStick, isEqual, Check, isHandwarmer, ListChecks} from '../index';
+import { expect, test } from '@jest/globals';
+import { FloatEquals, getTargetCoords, getUniqueCoords, isBoxController, Coord, SlippiGame, FramesType, getCoordListFromGame, toArrayBuffer, processAnalogStick, isEqual, Check, isHandwarmer, ListChecks } from '../index';
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,18 +15,18 @@ test('Get target coords', () => {
     var coords: Coord[] = []
     expect(getTargetCoords(coords).length).toEqual(0)
 
-    coords.push({x: 0, y: 0})
-    coords.push({x: -1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: -1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 0.5, y: 0.5})
-    coords.push({x: 1, y: 0.5})
-    coords.push({x: 1, y: 0.5})
-    coords.push({x: 1, y: 0.5})
+    coords.push({ x: 0, y: 0 })
+    coords.push({ x: -1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: -1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 0.5, y: 0.5 })
+    coords.push({ x: 1, y: 0.5 })
+    coords.push({ x: 1, y: 0.5 })
+    coords.push({ x: 1, y: 0.5 })
 
     var targets = getTargetCoords(coords)
     expect(targets.length).toEqual(2)
@@ -36,18 +36,18 @@ test('Get unique coords', () => {
     var coords: Coord[] = []
     expect(getUniqueCoords(coords).length).toEqual(0)
 
-    coords.push({x: 0, y: 0})
-    coords.push({x: -1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: -1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 1, y: 0})
-    coords.push({x: 0.5, y: 0.5})
-    coords.push({x: 1, y: 0.5})
-    coords.push({x: 1, y: 0.5})
-    coords.push({x: 1, y: 0.5})
+    coords.push({ x: 0, y: 0 })
+    coords.push({ x: -1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: -1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 1, y: 0 })
+    coords.push({ x: 0.5, y: 0.5 })
+    coords.push({ x: 1, y: 0.5 })
+    coords.push({ x: 1, y: 0.5 })
+    coords.push({ x: 1, y: 0.5 })
 
     var targets = getUniqueCoords(coords)
     expect(targets.length).toEqual(5)
@@ -115,7 +115,7 @@ test('Is box inputs?', () => {
 })
 
 test('Is box inputs? Potion dataset', () => {
-    for (let i=1; i <= 7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/potion_p3/potion_' + i + '.slp'), null);
         let game = new SlippiGame(toArrayBuffer(data))
         expect(game).not.toBeNull()
@@ -156,8 +156,8 @@ test('Parse replay file correctly', () => {
 
 test('Process main stick inputs', () => {
 
-    expect(isEqual(processAnalogStick({x: 0, y: 0}, false), {x: 0, y: 0})).toEqual(true)
-    expect(isEqual(processAnalogStick({x: 0, y: -80}, false), {x: 0, y: -1})).toEqual(true)
+    expect(isEqual(processAnalogStick({ x: 0, y: 0 }, false), { x: 0, y: 0 })).toEqual(true)
+    expect(isEqual(processAnalogStick({ x: 0, y: -80 }, false), { x: 0, y: -1 })).toEqual(true)
 
     const data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/techno_p1/Steech_vs_techno_G1.slp'), null);
     const game = new SlippiGame(toArrayBuffer(data))
@@ -165,10 +165,10 @@ test('Process main stick inputs', () => {
     for (let frame = -123; frame < 1794; frame++) {
         let x = frames[frame].players[0]?.pre.rawJoystickX
         let y = frames[frame].players[0]?.pre.rawJoystickY
-        let rawCoord: Coord = processAnalogStick({x: x, y:y}, true)
+        let rawCoord: Coord = processAnalogStick({ x: x, y: y }, true)
         let processedX = frames[frame].players[0]?.pre.joystickX
         let processedY = frames[frame].players[0]?.pre.joystickY
-        let processedCoord = {x: processedX, y: processedY}
+        let processedCoord = { x: processedX, y: processedY }
 
         expect(isEqual(processedCoord, rawCoord)).toEqual(true)
     }
@@ -177,7 +177,7 @@ test('Process main stick inputs', () => {
 test('Is handwarmer? (A)', async () => {
     const slpDir = path.join(__dirname, '../../test_data/legal/digital/techno_p1')
     const files: string[] = await fs.promises.readdir(slpDir);
-    for(const filename of files ) {
+    for (const filename of files) {
         let data = fs.readFileSync(path.join(slpDir, filename), null);
         let game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toEqual(false)
@@ -187,7 +187,7 @@ test('Is handwarmer? (A)', async () => {
 test('Is handwarmer? (B)', async () => {
     const handwarmerDir = path.join(__dirname, '../../test_data/handwarmers/')
     const handwarmerFiles: string[] = await fs.promises.readdir(handwarmerDir);
-    for(const filename of handwarmerFiles ) {
+    for (const filename of handwarmerFiles) {
         let data = fs.readFileSync(path.join(handwarmerDir, filename), null);
         let game = new SlippiGame(toArrayBuffer(data))
         expect(isHandwarmer(game)).toEqual(true)

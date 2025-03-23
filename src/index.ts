@@ -1,20 +1,20 @@
-import {SlippiGame, FramesType} from './slippi'
+import { SlippiGame, FramesType } from './slippi'
 import * as semver from 'semver'
-import {hasDisallowedCStickCoords} from './disallowed_analog_values'
-import {hasIllegalTravelTime} from './travel_time'
-import {hasIllegalUptiltRounding} from './uptilt_rounding'
-import {hasIllegalCrouchUptilt} from './crouch_uptilt'
-import {hasIllegalSDI} from './sdi'
-import {isGoomwave} from './goomwave'
-import {controlStickViz} from './control_stick_viz'
+import { hasDisallowedCStickCoords } from './disallowed_analog_values'
+import { hasIllegalTravelTime } from './travel_time'
+import { hasIllegalUptiltRounding } from './uptilt_rounding'
+import { hasIllegalCrouchUptilt } from './crouch_uptilt'
+import { hasIllegalSDI } from './sdi'
+import { isGoomwave } from './goomwave'
+import { controlStickViz } from './control_stick_viz'
 
-export {hasDisallowedCStickCoords, getCStickViolations} from './disallowed_analog_values'
-export {averageTravelCoordHitRate, hasIllegalTravelTime} from './travel_time'
-export {hasIllegalUptiltRounding} from './uptilt_rounding'
-export {hasIllegalSDI} from './sdi'
-export {isGoomwave} from './goomwave'
-export {hasIllegalCrouchUptilt} from './crouch_uptilt'
-export {controlStickViz} from './control_stick_viz'
+export { hasDisallowedCStickCoords, getCStickViolations } from './disallowed_analog_values'
+export { averageTravelCoordHitRate, hasIllegalTravelTime } from './travel_time'
+export { hasIllegalUptiltRounding } from './uptilt_rounding'
+export { hasIllegalSDI } from './sdi'
+export { isGoomwave } from './goomwave'
+export { hasIllegalCrouchUptilt } from './crouch_uptilt'
+export { controlStickViz } from './control_stick_viz'
 
 export * from './slippi'
 
@@ -51,30 +51,37 @@ export type Check = {
 export function ListChecks(): Check[] {
   var checks: Check[] = []
 
-  checks.push({name: "Box Travel Time", 
-              checkFunction: hasIllegalTravelTime
-              })
-  checks.push({name: "Disallowed Analog C-Stick Values", 
-              checkFunction: hasDisallowedCStickCoords
-              })
-  checks.push({name: "Uptilt Rounding", 
-              checkFunction: hasIllegalUptiltRounding
-              })
-  checks.push({name: "Fast Crouch Uptilt", 
-              checkFunction: hasIllegalCrouchUptilt
-              })
-  checks.push({name: "Illegal SDI", 
-              checkFunction: hasIllegalSDI
-              })
-  checks.push({name: "GoomWave Clamping", 
-              checkFunction: isGoomwave
-              })              
-  checks.push({name: "Control Stick Visualization", 
-              checkFunction: controlStickViz
-              })
+  checks.push({
+    name: "Box Travel Time",
+    checkFunction: hasIllegalTravelTime
+  })
+  checks.push({
+    name: "Disallowed Analog C-Stick Values",
+    checkFunction: hasDisallowedCStickCoords
+  })
+  checks.push({
+    name: "Uptilt Rounding",
+    checkFunction: hasIllegalUptiltRounding
+  })
+  checks.push({
+    name: "Fast Crouch Uptilt",
+    checkFunction: hasIllegalCrouchUptilt
+  })
+  checks.push({
+    name: "Illegal SDI",
+    checkFunction: hasIllegalSDI
+  })
+  checks.push({
+    name: "GoomWave Clamping",
+    checkFunction: isGoomwave
+  })
+  checks.push({
+    name: "Control Stick Visualization",
+    checkFunction: controlStickViz
+  })
 
 
-              
+
   return checks
 }
 
@@ -99,7 +106,7 @@ export type Coord = {
 
 export function jsonToCoord(json: string): Coord {
   var parsed = JSON.parse(json)
-  return {x: parsed.x, y: parsed.y}
+  return { x: parsed.x, y: parsed.y }
 }
 
 export function isEqual(one: Coord, other: Coord): boolean {
@@ -107,7 +114,7 @@ export function isEqual(one: Coord, other: Coord): boolean {
 }
 
 export function FloatEquals(a: number, b: number): boolean {
-  if (Math.abs(a-b) < 0.0001) {
+  if (Math.abs(a - b) < 0.0001) {
     return true
   }
   return false
@@ -161,9 +168,9 @@ export function getJoystickRegion(x: number, y: number): JoystickRegion {
 // Uniques a set of coords
 export function getUniqueCoords(coordinates: Coord[]): Coord[] {
   const targetsSet = new Set<string>()
-  
+
   for (let coord of coordinates) {
-      targetsSet.add(JSON.stringify(coord))
+    targetsSet.add(JSON.stringify(coord))
   }
 
   // All of this just so we can have a set of an object by value
@@ -173,7 +180,7 @@ export function getUniqueCoords(coordinates: Coord[]): Coord[] {
     targets.push(jsonToCoord(target))
   }
 
-  return targets  
+  return targets
 }
 
 // Gets a list of "target" coordinates, defined as having dwelled there
@@ -181,7 +188,7 @@ export function getUniqueCoords(coordinates: Coord[]): Coord[] {
 //  IE: Removing travel time coords
 export function getTargetCoords(coordinates: Coord[]): Coord[] {
   const targetsSet = new Set<string>()
-  
+
   var lastCoord: Coord = null
   for (let coord of coordinates) {
     if (lastCoord != null) {
@@ -195,7 +202,7 @@ export function getTargetCoords(coordinates: Coord[]): Coord[] {
   // All of this just so we can have a set of an object by value
   //  Get your shit together, JavaScript
   var targets: Coord[] = []
-  for (let target of targetsSet) {   
+  for (let target of targetsSet) {
     targets.push(jsonToCoord(target))
   }
 
@@ -203,9 +210,9 @@ export function getTargetCoords(coordinates: Coord[]): Coord[] {
 }
 
 export function processAnalogStick(coord: Coord, deadzone: boolean): Coord {
-  let magnitudeSquared = (coord.x*coord.x) + (coord.y*coord.y)
+  let magnitudeSquared = (coord.x * coord.x) + (coord.y * coord.y)
   if (magnitudeSquared < 1e-3) {
-    return {x: 0, y: 0}
+    return { x: 0, y: 0 }
   }
 
   let magnitude = Math.sqrt(magnitudeSquared)
@@ -217,10 +224,10 @@ export function processAnalogStick(coord: Coord, deadzone: boolean): Coord {
     let shrinkFactor = threshold / magnitude
     if (fX > 0) {
       fX = Math.floor(fX * shrinkFactor)
-      fY = Math.floor(fY * shrinkFactor)  
+      fY = Math.floor(fY * shrinkFactor)
     } else {
       fX = Math.ceil(fX * shrinkFactor)
-      fY = Math.ceil(fY * shrinkFactor)  
+      fY = Math.ceil(fY * shrinkFactor)
     }
   }
 
@@ -238,7 +245,7 @@ export function processAnalogStick(coord: Coord, deadzone: boolean): Coord {
   fX = Math.round(fX)
   fY = Math.round(fY)
 
-  return {x: Math.floor(fX) / 80, y: Math.floor(fY) / 80}
+  return { x: Math.floor(fX) / 80, y: Math.floor(fY) / 80 }
 }
 
 export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMainStick: boolean): Coord[] {
@@ -247,7 +254,7 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
   var frame: number = -123
   while (true) {
     try {
-      var coord: Coord = {x: 0, y: 0}
+      var coord: Coord = { x: 0, y: 0 }
       var x: number = 0
       if (isMainStick) {
         x = frames[frame].players[playerIndex]?.pre.rawJoystickX
@@ -267,15 +274,15 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
         coord.y = y
       }
 
-      if(isMainStick) {
+      if (isMainStick) {
         coord = processAnalogStick(coord, false)
       }
 
       coords.push(coord)
     }
-    catch(err: any) {
+    catch (err: any) {
       break
-    } 
+    }
     frame += 1
   }
   return coords
@@ -283,7 +290,7 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
 
 export function isBoxController(coordinates: Coord[]): boolean {
   var targets = getTargetCoords(coordinates)
-  var deadCenter: Coord = {x: 0, y: 0}
+  var deadCenter: Coord = { x: 0, y: 0 }
   // If we get two non-zero target coords in the deadzone, then it's def analog
   //  NOTE: The opposite is not true. It's normal to have an analog controller 
   //    sometimes only register targets at 0,0
@@ -300,7 +307,7 @@ export function isBoxController(coordinates: Coord[]): boolean {
 
   // Is the overall gamewide unique coords/sec rate > 5?
   let uniqueCoords = getUniqueCoords(coordinates)
-  let coordsPerSecond: number = ((uniqueCoords.length*60)/coordinates.length)
+  let coordsPerSecond: number = ((uniqueCoords.length * 60) / coordinates.length)
   if (coordsPerSecond > 5) {
     return false
   }

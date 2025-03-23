@@ -1,6 +1,6 @@
-import {expect, test} from '@jest/globals';
-import {Coord, SlippiGame, getCoordListFromGame, toArrayBuffer} from '../index';
-import {hasIllegalCrouchUptilt} from '../crouch_uptilt';
+import { expect, test } from '@jest/globals';
+import { Coord, SlippiGame, getCoordListFromGame, toArrayBuffer } from '../index';
+import { hasIllegalCrouchUptilt } from '../crouch_uptilt';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -15,7 +15,7 @@ test('Test Crouch Uptilt (nonlegal)', async () => {
     expect(checkResult.violations.length).toEqual(6)
 
     for (let violation of checkResult.violations) {
-        expect(violation.evidence[0]).toEqual({"x": 0, "y": -1})
+        expect(violation.evidence[0]).toEqual({ "x": 0, "y": -1 })
     }
 })
 

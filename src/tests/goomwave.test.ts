@@ -1,10 +1,10 @@
-import {expect, test} from '@jest/globals';
-import {Coord, averageTravelCoordHitRate, SlippiGame, getCoordListFromGame, toArrayBuffer, isGoomwave} from '../index';
+import { expect, test } from '@jest/globals';
+import { Coord, averageTravelCoordHitRate, SlippiGame, getCoordListFromGame, toArrayBuffer, isGoomwave } from '../index';
 import * as fs from 'fs';
 import * as path from 'path';
 
 test('Test isGoomwave (negative)', () => {
-    for (let i=1; i <= 7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/potion_p3/potion_' + i + '.slp'), null);
         let game = new SlippiGame(toArrayBuffer(data))
         expect(game).not.toBeNull()

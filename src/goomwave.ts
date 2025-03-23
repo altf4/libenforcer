@@ -1,5 +1,5 @@
-import {SlippiGame} from './slippi'
-import {Coord, isBoxController, CheckResult, Violation, FloatEquals} from './index';
+import { SlippiGame } from './slippi'
+import { Coord, isBoxController, CheckResult, Violation, FloatEquals } from './index';
 
 export function isGoomwave(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // Goomwaves seem to clamp anything under 0.0875 to the cardinal
@@ -9,7 +9,7 @@ export function isGoomwave(game: SlippiGame, playerIndex: number, coords: Coord[
     if (isBoxController(coords)) {
         return new CheckResult(false)
     }
-    
+
     for (let coord of coords) {
         // Ignore coords on the cardinals. They don't count
         if (FloatEquals(coord.x, 0) || FloatEquals(coord.y, 0)) {

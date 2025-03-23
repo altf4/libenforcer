@@ -1,10 +1,10 @@
-import {expect, test} from '@jest/globals'
-import {Coord, hasIllegalSDI, SlippiGame, getCoordListFromGame, toArrayBuffer, Violation} from '../index'
-import {SDIRegion, getSDIRegion, isDiagonalAdjacent, failsSDIRuleOne, failsSDIRuleTwo, failsSDIRuleThree} from '../sdi'
+import { expect, test } from '@jest/globals'
+import { Coord, hasIllegalSDI, SlippiGame, getCoordListFromGame, toArrayBuffer, Violation } from '../index'
+import { SDIRegion, getSDIRegion, isDiagonalAdjacent, failsSDIRuleOne, failsSDIRuleTwo, failsSDIRuleThree } from '../sdi'
 import * as fs from 'fs'
 import * as path from 'path'
 
-test('Test Region Sanity Check', ()  => {
+test('Test Region Sanity Check', () => {
     // DZ - Dead Zone Test
     expect(getSDIRegion(0, 0)).toBe(SDIRegion.DZ)
     expect(getSDIRegion(0.2, 0.2)).toBe(SDIRegion.DZ)
@@ -41,7 +41,7 @@ test('Test Region Sanity Check', ()  => {
     // W - West
     expect(getSDIRegion(-0.8, 0)).toBe(SDIRegion.W)
     expect(getSDIRegion(-0.9, 0.2)).toBe(SDIRegion.W)
- 
+
     // TILT - Middle-ish area
     expect(getSDIRegion(0.4, 0.4)).toBe(SDIRegion.TILT)
     expect(getSDIRegion(-0.4, -0.4)).toBe(SDIRegion.TILT)
@@ -68,14 +68,14 @@ test('Test Region Sanity Check', ()  => {
 })
 
 test('Test SDI from legal digital file', () => {
-        let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/potion_p3/potion_' + 2 + '.slp'), null)
-        let game = new SlippiGame(toArrayBuffer(data))
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/potion_p3/potion_' + 2 + '.slp'), null)
+    let game = new SlippiGame(toArrayBuffer(data))
 
-        expect(game).not.toBeNull()
-        let gameCoords: Coord[] = getCoordListFromGame(game, 2, true)
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 2, true)
 
-        expect(failsSDIRuleOne(gameCoords)).toEqual([])
-        expect(failsSDIRuleThree(gameCoords)).toEqual([])
+    expect(failsSDIRuleOne(gameCoords)).toEqual([])
+    expect(failsSDIRuleThree(gameCoords)).toEqual([])
 })
 
 test('Test isDiagonalAdjacent()', async () => {
@@ -89,23 +89,23 @@ test('Test isDiagonalAdjacent()', async () => {
 
 test('Test SDI (manual coords)', async () => {
     // Sanity check. No movement. No violation
-    let coords: Coord[] = [{x: 0, y: 0}, {x: 0, y: 0}, {x: 0, y: 0}, {x: 0, y: 0}, {x: 0, y: 0}, {x: 0, y: 0}]
+    let coords: Coord[] = [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }]
     expect(failsSDIRuleOne(coords)).toEqual([])
 
     // Easy case. Lots of SDI. Violation.
-    coords = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 1, y: 0}]
+    coords = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }]
     expect(failsSDIRuleOne(coords).length).toBeGreaterThanOrEqual(1)
 
     // Too many frames in the tilt zone, doesn't count as SDI!
-    coords = [{x: 0, y: 0}, {x: 0.3, y: 0}, {x: 0.32, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 1, y: 0}]
+    coords = [{ x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 0.32, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }]
     expect(failsSDIRuleOne(coords)).toEqual([])
 
     // Staggered SDIs. Does count as a violation! (slowest possible)
-    coords = [{x: 0, y: 0}, {x: 0.3, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0.35, y: 0}, {x: 0.4, y: 0}, {x: 1, y: 0}]
+    coords = [{ x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }, { x: 1, y: 0 }]
     expect(failsSDIRuleOne(coords).length).toEqual(1)
 
     // Polled in the tilt zone. Still a violation
-    coords = [{x: 0, y: 0}, {x: 0.3, y: 0}, {x: 1, y: 0}, {x: 0, y: 0}, {x: 0.3, y: 0}, {x: 1, y: 0}]
+    coords = [{ x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 1, y: 0 }]
     expect(failsSDIRuleOne(coords).length).toEqual(1)
 })
 
@@ -174,7 +174,7 @@ test('Test SDI (non legal A)', async () => {
     expect(violations.length).toEqual(195)
     expect(violations[10].reason).toEqual("Failed SDI rule #1")
     expect(violations[10].metric).toEqual(139)
-    expect(violations[10].evidence).toEqual([{"x": 0, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}, {"x": -1, "y": 0}, {"x": 0, "y": 0}])
+    expect(violations[10].evidence).toEqual([{ "x": 0, "y": 0 }, { "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 0, "y": 0 }, { "x": -1, "y": 0 }, { "x": 0, "y": 0 }])
 })
 
 test('Test SDI (non legal B)', async () => {
@@ -187,7 +187,7 @@ test('Test SDI (non legal B)', async () => {
     expect(violations.length).toEqual(36)
     expect(violations[10].reason).toEqual("Failed SDI rule #2")
     expect(violations[10].metric).toEqual(226)
-    expect(violations[10].evidence).toEqual([{"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}, {"x": 0.7, "y": 0.7}, {"x": 1, "y": 0}])
+    expect(violations[10].evidence).toEqual([{ "x": 1, "y": 0 }, { "x": 0.7, "y": 0.7 }, { "x": 1, "y": 0 }, { "x": 0.7, "y": 0.7 }, { "x": 1, "y": 0 }])
 })
 
 test('Test SDI (non legal C)', async () => {
@@ -199,10 +199,10 @@ test('Test SDI (non legal C)', async () => {
     // Fails rule #3 but not rule #1
     expect(hasIllegalSDI(game, 3, coords).result).toEqual(true)
     expect(failsSDIRuleOne(coords)).toEqual([])
-    
+
     let violations: Violation[] = failsSDIRuleThree(coords)
     expect(violations.length).toEqual(8)
     expect(violations[4].reason).toEqual("Failed SDI rule #3")
     expect(violations[4].metric).toEqual(2535)
-    expect(violations[4].evidence).toEqual([{"x": 0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}, {"x": 0, "y": 1}, {"x": -0.7, "y": 0.7}, {"x": 0.7, "y": 0.7}])
+    expect(violations[4].evidence).toEqual([{ "x": 0.7, "y": 0.7 }, { "x": 0.7, "y": 0.7 }, { "x": 0, "y": 1 }, { "x": -0.7, "y": 0.7 }, { "x": 0.7, "y": 0.7 }])
 })

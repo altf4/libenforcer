@@ -1,10 +1,10 @@
-import {SlippiGame} from './slippi'
-import {Coord, FloatEquals, CheckResult, Violation, isBoxController, getCoordListFromGame} from './index';
+import { SlippiGame } from './slippi'
+import { Coord, FloatEquals, CheckResult, Violation, isBoxController, getCoordListFromGame } from './index';
 
 export function hasDisallowedCStickCoords(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // If we're on analog, then it always passes
     // NOTE: We inspect C-Stick coords for this check, so we have to get the main stick coords for this conditional
-        if (!isBoxController(getCoordListFromGame(game, playerIndex, true))) {
+    if (!isBoxController(getCoordListFromGame(game, playerIndex, true))) {
         return new CheckResult(false)
     }
 
