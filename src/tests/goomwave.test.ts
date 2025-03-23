@@ -1,5 +1,6 @@
 import { expect, test } from '@jest/globals';
-import { Coord, averageTravelCoordHitRate, SlippiGame, getCoordListFromGame, toArrayBuffer, isGoomwave } from '../index';
+import { Coord, SlippiGame, getCoordListFromGame, toArrayBuffer, isGoomwave } from '../index';
+import { hasGoomwaveClamping } from '../goomwave';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -19,7 +20,7 @@ test('Test isGoomwave A (positive)', async () => {
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 0, true)
 
-    expect(isGoomwave(game, 0, coords).result).toEqual(true)
+    expect(hasGoomwaveClamping(coords)).toEqual(true)
 })
 
 

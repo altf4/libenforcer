@@ -289,32 +289,54 @@ export function getCoordListFromGame(game: SlippiGame, playerIndex: number, isMa
 }
 
 export function isBoxController(coordinates: Coord[]): boolean {
-  var targets = getTargetCoords(coordinates)
-  var deadCenter: Coord = { x: 0, y: 0 }
-  // If we get two non-zero target coords in the deadzone, then it's def analog
-  //  NOTE: The opposite is not true. It's normal to have an analog controller 
-  //    sometimes only register targets at 0,0
-  let dzTargetCount: number = 0
-  for (let target of targets) {
-    if (!isEqual(target, deadCenter) && (getJoystickRegion(target.x, target.y) === JoystickRegion.DZ)) {
-      dzTargetCount++
+  let RIM_COORD_MAX = 432
+
+  let rimCount = countRimCoords(coordinates)
+  let rimProportion = rimCount / RIM_COORD_MAX
+  // If you hit less than 50% of the rim, then it's a box controller
+  if (rimProportion < 0.50) {
+    return true
+  }
+
+  return false
+}
+
+// Count the number of coordinates that are on the rim of the joystick
+//  allowing for being within .0125 of the rim
+function countRimCoords(coords: Coord[]): number {
+  let rimCoords = new Set<string>()
+  for (let coord of coords) {
+    // If the coord is within one unit of the rim, then it's a rim coord.
+    let distance = Math.sqrt(((Math.abs(coord.x) + 0.0125) ** 2) + ((Math.abs(coord.y) + 0.0125) ** 2))
+    if (distance >= 1) {
+      rimCoords.add(JSON.stringify(coord))
     }
   }
-
-  if (dzTargetCount >= 2) {
-    return false
-  }
-
-  // Is the overall gamewide unique coords/sec rate > 5?
-  let uniqueCoords = getUniqueCoords(coordinates)
-  let coordsPerSecond: number = ((uniqueCoords.length * 60) / coordinates.length)
-  if (coordsPerSecond > 5) {
-    return false
-  }
-
-  // TODO Other checks
-  return true
+  return rimCoords.size
 }
+
+
+// Divide the coordinates into zones. Count each of them up.
+// 0: Cardinals. Has to be on x, 0 or 0, y
+// 1: Yellow-zone. Within .125 of a cardinal
+// 2: Green-zone. Within .25 of a cardinal
+function getZoneCount(coords: Coord[]): number[] {
+  let zones: number[] = [0, 0, 0]
+  for (let coord of coords) {
+    // Never check for exact values of floats
+    if (Math.abs(coord.x) < 0.001 || Math.abs(coord.y) < 0.001) {
+      zones[0]++
+    }
+    else if (Math.abs(coord.x) < 0.125 || Math.abs(coord.y) < 0.125) {
+      zones[1]++
+    }
+    else if (Math.abs(coord.x) < 0.25 || Math.abs(coord.y) < 0.25) {
+      zones[2]++
+    }
+  }
+  return zones
+}
+
 
 // Is this a supported SLP replay version?
 export function isSlpMinVersion(game: SlippiGame): boolean {

@@ -7,6 +7,10 @@ export function hasIllegalUptiltRounding(game: SlippiGame, playerIndex: number, 
         return new CheckResult(false)
     }
 
+    return getUptiltCheck(game, playerIndex, coords)
+}
+
+export function getUptiltCheck(game: SlippiGame, playerIndex: number, coords: Coord[]): CheckResult {
     // y in range 0.2 - 0.275
     for (let coord of coords) {
         // Only consider coords in the x deadzone
