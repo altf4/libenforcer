@@ -124,22 +124,61 @@ test('Is box inputs? Potion dataset', () => {
     }
 })
 
+test('Is box inputs? Orca dataset A', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/orca/Game_20241228T175942.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 0, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
 
-// test('Is box inputs? xbox controller A', () => {
-//     let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/xbox_p2/Game_20250209T181347.slp'), null);
-//     let game = new SlippiGame(toArrayBuffer(data))
-//     expect(game).not.toBeNull()
-//     let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
-//     expect(isBoxController(gameCoords)).toEqual(false)
-// })
+test('Is box inputs? Orca dataset B', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/orca/Game_20241228T180350.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 0, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
 
-// test('Is box inputs? xbox controller B', () => {
-//     let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/xbox_p2/Game_20250209T183921.slp'), null);
-//     let game = new SlippiGame(toArrayBuffer(data))
-//     expect(game).not.toBeNull()
-//     let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
-//     expect(isBoxController(gameCoords)).toEqual(false)
-// })
+test('Is box inputs? Orca dataset C', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/orca/Game_20241228T180707.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 0, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
+
+test('Is box inputs? Orca dataset D', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/orca/Game_20241228T180831.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 0, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
+
+test('Is box inputs? Orca dataset E', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/orca/Game_20241228T181133.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 0, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
+
+test('Is box inputs? xbox controller A', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/xbox_p2/Game_20250209T181347.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
+
+test('Is box inputs? xbox controller B', () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/analog/xbox_p2/Game_20250209T183921.slp'), null);
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let gameCoords: Coord[] = getCoordListFromGame(game, 1, true)
+    expect(isBoxController(gameCoords)).toEqual(false)
+})
 
 test('Parse replay file correctly', () => {
     const data: Buffer = fs.readFileSync(path.join(__dirname, '../../test_data/banned_c_stick_analog_player_1.slp'), null);

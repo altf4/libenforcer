@@ -293,6 +293,17 @@ export function isBoxController(coordinates: Coord[]): boolean {
 
   let rimCount = countRimCoords(coordinates)
   let rimProportion = rimCount / RIM_COORD_MAX
+
+  // Let's call 10,800 coordinates a "normal" game length (3 minutes)
+  //  then give a boost to shorter games
+  // Or else we risk calling a box controller on a 1 minute game just because
+  //  they didn't move around much on the rim yet
+  let THREE_MINUTES = 10800
+  if (coordinates.length < THREE_MINUTES) {
+    let boost = 1 + ((THREE_MINUTES - coordinates.length) / THREE_MINUTES)
+    rimProportion *= boost
+  }
+
   // If you hit less than 50% of the rim, then it's a box controller
   if (rimProportion < 0.50) {
     return true
@@ -314,29 +325,6 @@ function countRimCoords(coords: Coord[]): number {
   }
   return rimCoords.size
 }
-
-
-// Divide the coordinates into zones. Count each of them up.
-// 0: Cardinals. Has to be on x, 0 or 0, y
-// 1: Yellow-zone. Within .125 of a cardinal
-// 2: Green-zone. Within .25 of a cardinal
-function getZoneCount(coords: Coord[]): number[] {
-  let zones: number[] = [0, 0, 0]
-  for (let coord of coords) {
-    // Never check for exact values of floats
-    if (Math.abs(coord.x) < 0.001 || Math.abs(coord.y) < 0.001) {
-      zones[0]++
-    }
-    else if (Math.abs(coord.x) < 0.125 || Math.abs(coord.y) < 0.125) {
-      zones[1]++
-    }
-    else if (Math.abs(coord.x) < 0.25 || Math.abs(coord.y) < 0.25) {
-      zones[2]++
-    }
-  }
-  return zones
-}
-
 
 // Is this a supported SLP replay version?
 export function isSlpMinVersion(game: SlippiGame): boolean {
