@@ -100,13 +100,18 @@ test('Test SDI (manual coords)', async () => {
     coords = [{ x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 0.32, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }]
     expect(failsSDIRuleOne(coords)).toEqual([])
 
-    // Staggered SDIs. Does count as a violation! (slowest possible)
+    // Slowest possible SDIs. Doesn't count as SDI since it has travel time
     coords = [{ x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }, { x: 1, y: 0 }]
-    expect(failsSDIRuleOne(coords).length).toEqual(1)
+    expect(failsSDIRuleOne(coords).length).toEqual(0)
 
-    // Polled in the tilt zone. Still a violation
+    // Doesn't count as SDI since it has travel time
     coords = [{ x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 0.3, y: 0 }, { x: 1, y: 0 }]
-    expect(failsSDIRuleOne(coords).length).toEqual(1)
+    expect(failsSDIRuleOne(coords).length).toEqual(0)
+
+    // Violation. SDI, then put in a bunch of travel time after. 
+    // IE: You don't get off the hook just because you have travel time after the SDI
+    coords = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0.3, y: 0 }, { x: 0.35, y: 0 }, { x: 0.4, y: 0 }]
+    expect(failsSDIRuleOne(coords).length).toBeGreaterThanOrEqual(1)
 })
 
 
@@ -136,26 +141,35 @@ test('Test SDI (legal B)', async () => {
 })
 
 
-//TODO This correctly fails. Fix later when we get an updated SLP
-// test('Test SDI (legal C)', async () => {
-//     let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/sdi/sdi_mash.slp'), null)
-//     let game = new SlippiGame(toArrayBuffer(data))
-//     expect(game).not.toBeNull()
-//     let coords: Coord[] = getCoordListFromGame(game, 0, true)
+test('Test SDI (legal C)', async () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/sdi/sdi_mash.slp'), null)
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let coords: Coord[] = getCoordListFromGame(game, 0, true)
 
-//     // expect(hasIllegalSDI(game, 0, coords).result).toEqual(false)
-//     expect(failsSDIRuleOne(coords)).toEqual([])
-//     expect(failsSDIRuleTwo(coords)).toEqual([])
-//     expect(failsSDIRuleThree(coords)).toEqual([])
-// })
+    expect(hasIllegalSDI(game, 0, coords).result).toEqual(false)
+    expect(failsSDIRuleOne(coords)).toEqual([])
+    expect(failsSDIRuleTwo(coords)).toEqual([])
+    expect(failsSDIRuleThree(coords)).toEqual([])
+})
 
 test('Test SDI (legal D)', async () => {
+    let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/sdi/Game_20250201T233229.slp'), null)
+    let game = new SlippiGame(toArrayBuffer(data))
+    expect(game).not.toBeNull()
+    let coords: Coord[] = getCoordListFromGame(game, 0, true)
+
+    expect(failsSDIRuleOne(coords)).toEqual([])
+    expect(failsSDIRuleTwo(coords)).toEqual([])
+    expect(failsSDIRuleThree(coords)).toEqual([])
+})
+
+test('Test SDI (legal E)', async () => {
     let data = fs.readFileSync(path.join(__dirname, '../../test_data/legal/digital/sdi/Game_20250201T232732.slp'), null)
     let game = new SlippiGame(toArrayBuffer(data))
     expect(game).not.toBeNull()
     let coords: Coord[] = getCoordListFromGame(game, 1, true)
 
-    // expect(hasIllegalSDI(game, 1, coords).result).toEqual(false)
     expect(failsSDIRuleOne(coords)).toEqual([])
     expect(failsSDIRuleTwo(coords)).toEqual([])
     expect(failsSDIRuleThree(coords)).toEqual([])

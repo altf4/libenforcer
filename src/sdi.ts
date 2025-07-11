@@ -134,6 +134,14 @@ export function isDiagonalAdjacent(regionA: SDIRegion, regionB: SDIRegion): bool
     return false
 }
 
+function countUniqueCoordinates(coords: Coord[]): number {
+    const uniqueCoords = new Set<string>();
+    for (const coord of coords) {
+        uniqueCoords.add(`${coord.x},${coord.y}`);
+    }
+    return uniqueCoords.size;
+}
+
 // Rapidly tapping the same direction and returning to neutral faster than once every 5.5 frames triggers 1 SDI and ignores subsequent attempts.
 // Returns: array of violations
 export function failsSDIRuleOne(coords: Coord[]): Violation[] {
@@ -168,8 +176,11 @@ export function failsSDIRuleOne(coords: Coord[]): Violation[] {
                 // And we also haven't spent more than 3 consecutive frames in the tilt zone
                 if (hasTouchedDZ && [SDIRegion.DZ, SDIRegion.TILT].includes(lastRegion) && regions[i + j] === firstSDIRegion && consecutiveTiltFrames <= 3) {
                     if (i + j <= lastSDIFrame + 4) {
-                        // Two SDI frames were less than 5 frames away from each other!
-                        violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i + 10)))
+                        // This is a hack to be lenient as long as there's travel time
+                        if (countUniqueCoordinates(coords.slice(i, i + j)) <= 2) {
+                            // Two SDI frames were less than 5 frames away from each other!
+                            violations.push(new Violation(i, "Failed SDI rule #1", coords.slice(i, i + 10)))
+                        }
                     }
                     lastSDIFrame = i + j
                     hasTouchedDZ = false // Reset the DZ counter
