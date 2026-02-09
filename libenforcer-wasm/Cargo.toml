@@ -1,0 +1,31 @@
+[package]
+name = "libenforcer-wasm"
+version = "0.1.0"
+edition = "2021"
+authors = ["altf4"]
+license = "GPL-3.0-or-later"
+description = "WebAssembly implementation of Slippi enforcer checks"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+peppi = "2"
+wasm-bindgen = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+js-sys = "0.3"
+getrandom = { version = "0.3", features = ["wasm_js"] }
+console_error_panic_hook = { version = "0.1", optional = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[features]
+default = ["console_error_panic_hook"]
+
+[profile.release]
+opt-level = "z"       # Optimize for size
+lto = true            # Link-time optimization
+codegen-units = 1     # Better optimization
+panic = "abort"       # Smaller binary size

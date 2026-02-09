@@ -40,3 +40,10 @@ sketch
 
 .vscode/
 TODO
+
+# Rust
+libenforcer-wasm/target/
+libenforcer-wasm/Cargo.lock
+
+# WASM build output
+web/pkg/

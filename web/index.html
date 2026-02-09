@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slippi Enforcer - WASM Edition</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Slippi Enforcer</h1>
+            <p class="subtitle">WebAssembly-powered cheat detection for Super Smash Bros Melee</p>
+        </header>
+
+        <main>
+            <section class="upload-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="slpFile" accept=".slp" />
+                    <label for="slpFile" class="file-label">
+                        <span class="file-icon">📁</span>
+                        <span class="file-text">Choose .SLP replay file</span>
+                    </label>
+                </div>
+                <button id="analyzeBtn" class="analyze-btn" disabled>Analyze Replay</button>
+            </section>
+
+            <section class="info-section">
+                <h2>About</h2>
+                <p>This tool analyzes Slippi replay files (.SLP) for evidence of cheating in Super Smash Bros Melee.
+                   All analysis happens locally in your browser using WebAssembly - no data is uploaded to any server.</p>
+
+                <h3>Checks Performed:</h3>
+                <ul class="check-list">
+                    <li><strong>Box Travel Time</strong> - Detects digital box controllers by measuring travel coordinate patterns</li>
+                    <li><strong>Disallowed C-Stick Values</strong> - Flags illegal C-stick coordinates indicating hardware manipulation</li>
+                    <li><strong>Uptilt Rounding</strong> - Detects artificial rounding on analog controllers</li>
+                    <li><strong>Fast Crouch Uptilt</strong> - Detects impossibly fast state transitions (&lt;3 frames)</li>
+                    <li><strong>Illegal SDI</strong> - Detects impossible SDI (Super Defensive Input) patterns</li>
+                    <li><strong>GoomWave Clamping</strong> - Detects GoomWave hardware modifications</li>
+                </ul>
+            </section>
+
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <h2>Analysis Results</h2>
+                <div id="results"></div>
+            </section>
+
+            <section id="loadingSection" class="loading-section" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing replay...</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>
+                Powered by <a href="https://github.com/hohav/peppi" target="_blank">Peppi</a> (Rust Slippi parser)
+                and WebAssembly
+            </p>
+            <p>
+                <a href="https://github.com/altf4/enforcer" target="_blank">Source Code</a>
+            </p>
+        </footer>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
