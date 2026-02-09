@@ -277,7 +277,6 @@ pub fn fails_sdi_rule_three(coords: &[Coord]) -> Vec<Violation> {
                     "Failed SDI rule #3".to_string(),
                     evidence,
                 ));
-                break;
             }
         }
     }

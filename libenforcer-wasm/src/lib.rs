@@ -1,6 +1,22 @@
+// Expose modules publicly for all non-WASM builds (including tests)
+// This allows integration tests to access internals while keeping them private for WASM
+#[cfg(not(target_arch = "wasm32"))]
+pub mod checks;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod parser;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod types;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod utils;
+
+// Keep modules private for WASM builds
+#[cfg(target_arch = "wasm32")]
 mod checks;
+#[cfg(target_arch = "wasm32")]
 mod parser;
-mod types;
+#[cfg(target_arch = "wasm32")]
+pub mod types;  // types needs to be pub for WASM bindings
+#[cfg(target_arch = "wasm32")]
 mod utils;
 
 use wasm_bindgen::prelude::*;
@@ -73,7 +89,7 @@ pub fn check_uptilt_rounding(slp_bytes: &[u8], player_index: usize) -> Result<Js
     let player_data = parser::extract_player_data(&game, player_index)
         .ok_or_else(|| JsValue::from_str("Player not found"))?;
 
-    let result = checks::uptilt_rounding::check(&player_data.main_coords, &player_data.raw_joystick_coords);
+    let result = checks::uptilt_rounding::check(&player_data.main_coords);
 
     serde_wasm_bindgen::to_value(&result)
         .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))

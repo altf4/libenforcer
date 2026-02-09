@@ -30,16 +30,26 @@ pub fn extract_player_data(game: &impl Game, player_index: usize) -> Option<Play
         let pre = &port_data.leader.pre;
         let post = &port_data.leader.post;
 
-        // Main stick - process analog stick normalization
-        let main_x = pre.joystick.x;
-        let main_y = pre.joystick.y;
-        let processed_main = process_analog_stick(main_x, main_y, false);
+        // Main stick - use raw analog values (int8, like slippi-js rawJoystickX/Y)
+        // when available, otherwise fall back to peppi's already-normalized joystick
+        // (raw_analog_x added in Slippi v1.2, raw_analog_y in v3.15)
+        let (processed_main, raw_x_f64, raw_y_f64) =
+            if let (Some(rx), Some(ry)) = (pre.raw_analog_x, pre.raw_analog_y) {
+                let rx_f32 = rx as f32;
+                let ry_f32 = ry as f32;
+                (process_analog_stick(rx_f32, ry_f32, false), rx_f32 as f64, ry_f32 as f64)
+            } else {
+                // Fallback: peppi's joystick values are already engine-normalized (-1..1)
+                let coord = Coord { x: pre.joystick.x as f64, y: pre.joystick.y as f64 };
+                // Raw values unavailable, approximate from normalized
+                (coord, pre.joystick.x as f64 * 80.0, pre.joystick.y as f64 * 80.0)
+            };
         main_coords.push(processed_main);
 
         // Raw joystick for uptilt check
         raw_joystick_coords.push(Coord {
-            x: main_x as f64,
-            y: main_y as f64,
+            x: raw_x_f64,
+            y: raw_y_f64,
         });
 
         // C-stick - already normalized in Peppi

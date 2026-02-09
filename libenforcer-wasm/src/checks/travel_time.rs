@@ -25,7 +25,7 @@ pub fn check(coords: &[Coord]) -> CheckResult {
 /// Calculate the average travel coordinate hit rate
 /// Travel coordinates are intermediate values between target positions
 /// Target positions are coords that stay the same for 2+ frames
-fn average_travel_coord_hit_rate(coordinates: &[Coord]) -> f64 {
+pub fn average_travel_coord_hit_rate(coordinates: &[Coord]) -> f64 {
     let mut travel_coord_count = 0;
     let mut target_count = 0;
     let mut last_coord = Coord { x: 800.0, y: 800.0 }; // Impossible coord
