@@ -1,19 +1,24 @@
 {
   "name": "slp-enforcer",
   "version": "2.0.0",
+  "type": "module",
   "description": "Finds violations of the Melee Controller Ruleset by inspecting SLP files (WASM-powered)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "/dist",
-    "/pkg/node"
+    "/pkg/web"
   ],
   "scripts": {
-    "build:wasm:node": "cd libenforcer-wasm && wasm-pack build --target nodejs --out-dir ../pkg/node --release",
-    "build:wasm:web": "cd libenforcer-wasm && wasm-pack build --target web --out-dir ../pkg/web --release",
-    "build:wasm": "npm run build:wasm:node && npm run build:wasm:web",
+    "build:wasm": "cd libenforcer-wasm && wasm-pack build --target web --out-dir ../pkg/web --release && rm -f ../pkg/web/.gitignore",
     "build:ts": "tsc",
-    "build": "npm run build:wasm:node && npm run build:ts",
+    "build": "npm run build:wasm && npm run build:ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:debug": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",

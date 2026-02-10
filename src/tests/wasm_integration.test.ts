@@ -1,7 +1,8 @@
-import { expect, test } from '@jest/globals'
-import * as fs from 'fs'
-import * as path from 'path'
-import {
+import { expect, test, beforeAll } from '@jest/globals'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import init, {
   analyzeReplay,
   hasIllegalTravelTime,
   hasDisallowedCStickCoords,
@@ -26,15 +27,19 @@ import {
   hasGoomwaveClamping,
   processAnalogStick,
   isEqual,
-  toUint8Array,
   Coord,
-} from '../index'
+} from '../index.js'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const TEST_DATA = path.join(__dirname, '../../test_data')
+
+beforeAll(async () => {
+  await init()
+})
 
 function loadSlp(relativePath: string): Uint8Array {
   const data = fs.readFileSync(path.join(TEST_DATA, relativePath))
-  return toUint8Array(data)
+  return new Uint8Array(data.buffer, data.byteOffset, data.byteLength)
 }
 
 function loadSlpDir(relativePath: string): { name: string; data: Uint8Array }[] {
@@ -42,7 +47,10 @@ function loadSlpDir(relativePath: string): { name: string; data: Uint8Array }[] 
   return fs.readdirSync(dir)
     .filter(f => f.endsWith('.slp'))
     .sort()
-    .map(f => ({ name: f, data: toUint8Array(fs.readFileSync(path.join(dir, f))) }))
+    .map(f => {
+      const data = fs.readFileSync(path.join(dir, f))
+      return { name: f, data: new Uint8Array(data.buffer, data.byteOffset, data.byteLength) }
+    })
 }
 
 // ---- analyzeReplay ----

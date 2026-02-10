@@ -46,4 +46,5 @@ libenforcer-wasm/target/
 libenforcer-wasm/Cargo.lock
 
 # WASM build output
+pkg/
 web/pkg/

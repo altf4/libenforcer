@@ -1,7 +1,36 @@
-// slp-enforcer v2.0 -- WASM-backed implementation
+// slp-enforcer v3.0 -- WASM-backed implementation (universal: Node.js + Browser)
 // All business logic runs in Rust/WebAssembly via the peppi SLP parser.
+//
+// Usage:
+//   import init, { analyzeReplay } from 'slp-enforcer'
+//   await init()
+//   const result = analyzeReplay(slpBytes, playerIndex)
 
-const wasm = require('../pkg/node/libenforcer_wasm')
+import wasmInit, {
+  initSync,
+  analyze_replay,
+  check_travel_time,
+  check_disallowed_cstick,
+  check_uptilt_rounding,
+  check_crouch_uptilt,
+  check_sdi,
+  check_goomwave,
+  check_control_stick_viz,
+  check_handwarmer,
+  is_slp_min_version,
+  is_box_controller,
+  is_box_controller_from_coords,
+  get_coord_list_from_game,
+  get_cstick_violations,
+  average_travel_coord_hit_rate,
+  has_goomwave_clamping,
+  get_joystick_region,
+  process_analog_stick,
+  float_equals,
+  is_equal,
+  get_unique_coords,
+  get_target_coords,
+} from '../pkg/web/libenforcer_wasm.js'
 
 // ---- Type Definitions ----
 
@@ -58,41 +87,85 @@ export enum JoystickRegion {
   W = 8,
 }
 
+// ---- Initialization ----
+
+let initialized = false
+
+function ensureInitialized(): void {
+  if (!initialized) {
+    throw new Error('slp-enforcer: WASM not initialized. Call init() first.')
+  }
+}
+
+/**
+ * Initialize the WASM module. Must be called once before using any other function.
+ *
+ * - Node.js: call with no arguments; the WASM binary is loaded from disk automatically.
+ * - Browser: call with no arguments (loads relative to the module URL), or pass a
+ *   custom URL/path to the .wasm file if your bundler requires it.
+ */
+export default async function init(wasmSource?: any): Promise<void> {
+  if (initialized) return
+
+  if (typeof process !== 'undefined' && process.versions?.node && !wasmSource) {
+    // Node.js: load WASM from disk synchronously
+    const { readFileSync } = await import('node:fs')
+    const { fileURLToPath } = await import('node:url')
+    const { dirname, join } = await import('node:path')
+    const dir = dirname(fileURLToPath(import.meta.url))
+    initSync({ module: readFileSync(join(dir, '..', 'pkg', 'web', 'libenforcer_wasm_bg.wasm')) })
+  } else {
+    // Browser (or explicit source): use fetch-based async loading
+    await wasmInit(wasmSource)
+  }
+
+  initialized = true
+}
+export { init }
+
 // ---- Replay Analysis ----
 
 /** Run all checks on a player in one call */
 export function analyzeReplay(slpBytes: Uint8Array, playerIndex: number): AllCheckResults {
-  return wasm.analyze_replay(slpBytes, playerIndex) as AllCheckResults
+  ensureInitialized()
+  return analyze_replay(slpBytes, playerIndex) as AllCheckResults
 }
 
 // ---- Individual Check Functions ----
 
 export function hasIllegalTravelTime(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_travel_time(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_travel_time(slpBytes, playerIndex) as CheckResult
 }
 
 export function hasDisallowedCStickCoords(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_disallowed_cstick(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_disallowed_cstick(slpBytes, playerIndex) as CheckResult
 }
 
 export function hasIllegalUptiltRounding(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_uptilt_rounding(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_uptilt_rounding(slpBytes, playerIndex) as CheckResult
 }
 
 export function hasIllegalCrouchUptilt(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_crouch_uptilt(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_crouch_uptilt(slpBytes, playerIndex) as CheckResult
 }
 
 export function hasIllegalSDI(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_sdi(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_sdi(slpBytes, playerIndex) as CheckResult
 }
 
 export function isGoomwave(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_goomwave(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_goomwave(slpBytes, playerIndex) as CheckResult
 }
 
 export function controlStickViz(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  return wasm.check_control_stick_viz(slpBytes, playerIndex) as CheckResult
+  ensureInitialized()
+  return check_control_stick_viz(slpBytes, playerIndex) as CheckResult
 }
 
 // ---- List Checks ----
@@ -112,62 +185,71 @@ export function ListChecks(): Check[] {
 // ---- Utility Functions ----
 
 export function isHandwarmer(slpBytes: Uint8Array): boolean {
-  return wasm.check_handwarmer(slpBytes) as boolean
+  ensureInitialized()
+  return check_handwarmer(slpBytes) as boolean
 }
 
 export function isSlpMinVersion(slpBytes: Uint8Array): boolean {
-  return wasm.is_slp_min_version(slpBytes)
+  ensureInitialized()
+  return is_slp_min_version(slpBytes)
 }
 
 export function isBoxController(slpBytes: Uint8Array, playerIndex: number): boolean {
-  return wasm.is_box_controller(slpBytes, playerIndex)
+  ensureInitialized()
+  return is_box_controller(slpBytes, playerIndex)
 }
 
 export function isBoxControllerFromCoords(coords: Coord[]): boolean {
-  return wasm.is_box_controller_from_coords(coords)
+  ensureInitialized()
+  return is_box_controller_from_coords(coords)
 }
 
 export function getCoordListFromGame(slpBytes: Uint8Array, playerIndex: number, isMainStick: boolean): Coord[] {
-  return wasm.get_coord_list_from_game(slpBytes, playerIndex, isMainStick) as Coord[]
+  ensureInitialized()
+  return get_coord_list_from_game(slpBytes, playerIndex, isMainStick) as Coord[]
 }
 
 export function getCStickViolations(coords: Coord[]): Violation[] {
-  return wasm.get_cstick_violations(coords) as Violation[]
+  ensureInitialized()
+  return get_cstick_violations(coords) as Violation[]
 }
 
 export function averageTravelCoordHitRate(coords: Coord[]): number {
-  return wasm.average_travel_coord_hit_rate(coords)
+  ensureInitialized()
+  return average_travel_coord_hit_rate(coords)
 }
 
 export function hasGoomwaveClamping(coords: Coord[]): boolean {
-  return wasm.has_goomwave_clamping(coords)
+  ensureInitialized()
+  return has_goomwave_clamping(coords)
 }
 
 export function getJoystickRegion(x: number, y: number): JoystickRegion {
-  return wasm.get_joystick_region(x, y) as JoystickRegion
+  ensureInitialized()
+  return get_joystick_region(x, y) as JoystickRegion
 }
 
 export function processAnalogStick(x: number, y: number, deadzone: boolean): Coord {
-  return wasm.process_analog_stick(x, y, deadzone) as Coord
+  ensureInitialized()
+  return process_analog_stick(x, y, deadzone) as Coord
 }
 
 export function FloatEquals(a: number, b: number): boolean {
-  return wasm.float_equals(a, b)
+  ensureInitialized()
+  return float_equals(a, b)
 }
 
 export function isEqual(one: Coord, other: Coord): boolean {
-  return wasm.is_equal(one, other)
+  ensureInitialized()
+  return is_equal(one, other)
 }
 
 export function getUniqueCoords(coords: Coord[]): Coord[] {
-  return wasm.get_unique_coords(coords) as Coord[]
+  ensureInitialized()
+  return get_unique_coords(coords) as Coord[]
 }
 
 export function getTargetCoords(coords: Coord[]): Coord[] {
-  return wasm.get_target_coords(coords) as Coord[]
-}
-
-/** Convert a Node.js Buffer to Uint8Array (convenience for migration from v1) */
-export function toUint8Array(buffer: Buffer): Uint8Array {
-  return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+  ensureInitialized()
+  return get_target_coords(coords) as Coord[]
 }
