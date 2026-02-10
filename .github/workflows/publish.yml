@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
-          registry-url: 'https://registry.npmjs.org'
+      - name: Update npm for Trusted Publishing
+        run: npm install -g npm@latest
       - name: Install JS dependencies
         run: yarn install --frozen-lockfile
       - name: Build
