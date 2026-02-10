@@ -4,7 +4,7 @@ TypeScript and WebAssembly library for detecting cheating in Super Smash Bros Me
 
 ## WebAssembly Implementation
 
-Includes a high-performance Rust/WASM implementation.
+Includes a high-performance Rust/Wasm implementation.
 
 **Quick Start:**
 ```bash
