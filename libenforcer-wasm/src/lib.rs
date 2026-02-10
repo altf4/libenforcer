@@ -8,6 +8,10 @@ pub mod parser;
 pub mod types;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod utils;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod game_timer;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod handwarmer;
 
 // Keep modules private for WASM builds
 #[cfg(target_arch = "wasm32")]
@@ -18,6 +22,10 @@ mod parser;
 pub mod types;  // types needs to be pub for WASM bindings
 #[cfg(target_arch = "wasm32")]
 mod utils;
+#[cfg(target_arch = "wasm32")]
+mod game_timer;
+#[cfg(target_arch = "wasm32")]
+mod handwarmer;
 
 use wasm_bindgen::prelude::*;
 use peppi::io::slippi::de::read as read_slippi;
@@ -137,5 +145,41 @@ pub fn check_goomwave(slp_bytes: &[u8], player_index: usize) -> Result<JsValue, 
     let result = checks::goomwave::check(&player_data.main_coords);
 
     serde_wasm_bindgen::to_value(&result)
+        .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+}
+
+/// Control stick visualization — packages all coordinates as evidence
+#[wasm_bindgen]
+pub fn check_control_stick_viz(slp_bytes: &[u8], player_index: usize) -> Result<JsValue, JsValue> {
+    let game = read_slippi(&mut Cursor::new(slp_bytes), None)
+        .map_err(|e| JsValue::from_str(&format!("Parse error: {}", e)))?;
+
+    let player_data = parser::extract_player_data(&game, player_index)
+        .ok_or_else(|| JsValue::from_str("Player not found"))?;
+
+    let result = checks::control_stick_viz::check(&player_data.main_coords);
+
+    serde_wasm_bindgen::to_value(&result)
+        .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+}
+
+/// Check if a game is a handwarmer (warmup/practice session)
+#[wasm_bindgen]
+pub fn check_handwarmer(slp_bytes: &[u8]) -> Result<JsValue, JsValue> {
+    let game = read_slippi(&mut Cursor::new(slp_bytes), None)
+        .map_err(|e| JsValue::from_str(&format!("Parse error: {}", e)))?;
+
+    let result = handwarmer::is_handwarmer(&game);
+
+    serde_wasm_bindgen::to_value(&result)
+        .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+}
+
+/// List all available checks
+#[wasm_bindgen]
+pub fn list_checks() -> Result<JsValue, JsValue> {
+    let checks = types::list_checks();
+
+    serde_wasm_bindgen::to_value(&checks)
         .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
 }

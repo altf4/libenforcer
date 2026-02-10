@@ -4,6 +4,7 @@ pub mod uptilt_rounding;
 pub mod crouch_uptilt;
 pub mod sdi;
 pub mod goomwave;
+pub mod control_stick_viz;
 
 use crate::parser::PlayerGameData;
 use crate::types::AllCheckResults;
@@ -17,5 +18,6 @@ pub fn run_all(data: &PlayerGameData) -> AllCheckResults {
         crouch_uptilt: crouch_uptilt::check(&data.main_coords, &data.action_states),
         sdi: sdi::check(&data.main_coords),
         goomwave: goomwave::check(&data.main_coords),
+        control_stick_viz: control_stick_viz::check(&data.main_coords),
     }
 }

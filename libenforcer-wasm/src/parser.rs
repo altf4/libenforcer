@@ -76,18 +76,19 @@ pub fn extract_player_data(game: &impl Game, player_index: usize) -> Option<Play
 
 /// Process analog stick values to match the TypeScript implementation
 /// This mirrors the processAnalogStick() function from index.ts
+/// Uses f64 throughout to match JavaScript's number type
 pub fn process_analog_stick(x: f32, y: f32, deadzone: bool) -> Coord {
-    let magnitude_squared = (x * x) + (y * y);
+    let mut fx = x as f64;
+    let mut fy = y as f64;
+
+    let magnitude_squared = (fx * fx) + (fy * fy);
 
     if magnitude_squared < 1e-3 {
         return Coord { x: 0.0, y: 0.0 };
     }
 
     let magnitude = magnitude_squared.sqrt();
-    let threshold = 80.0;
-
-    let mut fx = x;
-    let mut fy = y;
+    let threshold = 80.0_f64;
 
     // Cap magnitude at threshold
     if magnitude > threshold {
@@ -117,8 +118,8 @@ pub fn process_analog_stick(x: f32, y: f32, deadzone: bool) -> Coord {
 
     // Normalize to -1.0..1.0 range
     Coord {
-        x: (fx / 80.0) as f64,
-        y: (fy / 80.0) as f64,
+        x: fx.floor() / 80.0,
+        y: fy.floor() / 80.0,
     }
 }
 

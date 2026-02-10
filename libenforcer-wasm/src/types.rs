@@ -89,4 +89,25 @@ pub struct AllCheckResults {
     pub crouch_uptilt: CheckResult,
     pub sdi: CheckResult,
     pub goomwave: CheckResult,
+    pub control_stick_viz: CheckResult,
+}
+
+/// Metadata about an available check
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CheckInfo {
+    pub name: String,
+}
+
+/// Returns the list of all available checks.
+/// Mirrors TypeScript ListChecks() from index.ts.
+pub fn list_checks() -> Vec<CheckInfo> {
+    vec![
+        CheckInfo { name: "Box Travel Time".to_string() },
+        CheckInfo { name: "Disallowed Analog C-Stick Values".to_string() },
+        CheckInfo { name: "Uptilt Rounding".to_string() },
+        CheckInfo { name: "Fast Crouch Uptilt".to_string() },
+        CheckInfo { name: "Illegal SDI".to_string() },
+        CheckInfo { name: "GoomWave Clamping".to_string() },
+        CheckInfo { name: "Control Stick Visualization".to_string() },
+    ]
 }

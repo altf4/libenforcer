@@ -25,7 +25,6 @@ wasm-bindgen-test = "0.3"
 default = ["console_error_panic_hook"]
 
 [profile.release]
-opt-level = "z"       # Optimize for size
 lto = true            # Link-time optimization
 codegen-units = 1     # Better optimization
 panic = "abort"       # Smaller binary size

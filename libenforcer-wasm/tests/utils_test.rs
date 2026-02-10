@@ -1,13 +1,13 @@
 //! Integration tests for utility functions
 //! Mirrors TypeScript tests in src/tests/utils.test.ts
-//! Test count: 15 (simplified version, excluding some complex parsing tests)
+//! Test count: 16
 
 #[path = "common/mod.rs"]
 mod common;
 
 use common::*;
-use libenforcer_wasm::{parser, types::Coord, utils};
-use peppi::game::{Game, Port};
+use libenforcer_wasm::{parser, types, types::Coord, utils};
+use peppi::game::Game;
 use peppi::io::slippi::de::read as read_slippi;
 use std::io::Cursor;
 
@@ -245,12 +245,34 @@ fn test_parse_replay_file_correctly() {
     let data = read_slp_file("banned_c_stick_analog_player_1.slp");
     let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
 
-    // Just verify we can read the game successfully
     assert!(game.len() > 0, "Game should have frames");
-    
-    // Verify we can access player data
-    let player_data = parser::extract_player_data(&game, 0);
-    assert!(player_data.is_some(), "Should be able to extract player data");
+
+    // Verify frame-by-frame that frame IDs are sequential starting at -123
+    // Mirrors TS: for (let frame = -123; frame < 1111; frame++)
+    //     expect(frames[frame].players[0]?.pre.frame).toEqual(frame)
+    for i in 0..game.len() {
+        let frame = game.frame(i);
+        let expected_id = peppi::frame::FIRST_INDEX + i as i32;
+        assert_eq!(
+            frame.id, expected_id,
+            "Frame at index {} should have id {}, got {}",
+            i, expected_id, frame.id
+        );
+    }
+
+    // Verify character ID at frame 500 (0-based index = 500 - (-123) = 623)
+    // Mirrors TS: expect(frames[500].players[0]?.post.internalCharacterId).toEqual(0x0A)
+    let frame_500_idx = (500 - peppi::frame::FIRST_INDEX) as usize;
+    let frame_500 = game.frame(frame_500_idx);
+    let port_data = frame_500
+        .ports
+        .iter()
+        .find(|p| p.port as usize == 0)
+        .expect("Player 0 should exist at frame 500");
+    assert_eq!(
+        port_data.leader.post.character, 0x0A,
+        "Player 0 at frame 500 should have internalCharacterId 0x0A"
+    );
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -262,4 +284,53 @@ fn test_process_main_stick_inputs() {
 
     let coord = parser::process_analog_stick(0.0, -80.0, false);
     assert!(utils::is_equal_coord(&coord, &Coord { x: 0.0, y: -1.0 }));
+
+    // Verify process_analog_stick matches the engine's processed joystick values
+    // frame-by-frame on a real SLP file.
+    // Mirrors TS: for (let frame = -123; frame < 1794; frame++) {
+    //     let rawCoord = processAnalogStick({x: rawJoystickX, y: rawJoystickY}, true)
+    //     expect(isEqual(processedCoord, rawCoord)).toEqual(true)
+    // }
+    let data = read_slp_file("legal/digital/techno_p1/Steech_vs_techno_G1.slp");
+    let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
+
+    for i in 0..game.len() {
+        let frame = game.frame(i);
+        // Match TS range: for (let frame = -123; frame < 1794; frame++)
+        if frame.id >= 1794 {
+            break;
+        }
+
+        let port_data = match frame.ports.iter().find(|p| p.port as usize == 0) {
+            Some(port) => port,
+            None => continue,
+        };
+
+        let pre = &port_data.leader.pre;
+        if let (Some(raw_x), Some(raw_y)) = (pre.raw_analog_x, pre.raw_analog_y) {
+            let raw_coord = parser::process_analog_stick(raw_x as f32, raw_y as f32, true);
+            let processed_coord = Coord {
+                x: pre.joystick.x as f64,
+                y: pre.joystick.y as f64,
+            };
+            assert!(
+                utils::is_equal_coord(&raw_coord, &processed_coord),
+                "Frame {}: process_analog_stick({}, {}, true) = ({}, {}), expected ({}, {})",
+                frame.id,
+                raw_x,
+                raw_y,
+                raw_coord.x,
+                raw_coord.y,
+                processed_coord.x,
+                processed_coord.y
+            );
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn test_list_checks() {
+    let checks = types::list_checks();
+    assert_eq!(checks.len(), 7, "Expected 7 checks");
 }
