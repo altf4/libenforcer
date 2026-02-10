@@ -1,4 +1,4 @@
-use crate::types::Coord;
+use crate::types::{Coord, JoystickRegion};
 use std::collections::HashSet;
 
 /// Float equality comparison with epsilon tolerance
@@ -91,6 +91,30 @@ pub fn get_target_coords(coordinates: &[Coord]) -> Vec<Coord> {
             y: f64::from_bits(y_bits),
         })
         .collect()
+}
+
+/// Classify joystick position into one of 9 regions
+/// Mirrors TypeScript getJoystickRegion() from index.ts
+pub fn get_joystick_region(x: f64, y: f64) -> JoystickRegion {
+    if x >= 0.2875 && y >= 0.2875 {
+        JoystickRegion::NE
+    } else if x >= 0.2875 && y <= -0.2875 {
+        JoystickRegion::SE
+    } else if x <= -0.2875 && y <= -0.2875 {
+        JoystickRegion::SW
+    } else if x <= -0.2875 && y >= 0.2875 {
+        JoystickRegion::NW
+    } else if y >= 0.2875 {
+        JoystickRegion::N
+    } else if x >= 0.2875 {
+        JoystickRegion::E
+    } else if y <= -0.2875 {
+        JoystickRegion::S
+    } else if x <= -0.2875 {
+        JoystickRegion::W
+    } else {
+        JoystickRegion::DZ
+    }
 }
 
 #[cfg(test)]
