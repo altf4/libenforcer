@@ -1,17 +1,20 @@
 #!/bin/bash
 set -e
 
-echo "Building WASM module with wasm-pack..."
 cd "$(dirname "$0")"
 
-# Build for web target (loads with ES modules)
-wasm-pack build --target web --out-dir ../web/pkg --release
+echo "Building WASM module (Node.js target)..."
+wasm-pack build --target nodejs --out-dir ../pkg/node --release
 
 echo ""
-echo "WASM build complete!"
-echo "Output directory: ../web/pkg"
-ls -lh ../web/pkg/*.wasm
+echo "Building WASM module (Web target)..."
+wasm-pack build --target web --out-dir ../pkg/web --release
 
 echo ""
-echo "WASM module size:"
-du -h ../web/pkg/*.wasm
+echo "Build complete!"
+echo ""
+echo "Node.js module:"
+du -h ../pkg/node/*.wasm
+echo ""
+echo "Web module:"
+du -h ../pkg/web/*.wasm
