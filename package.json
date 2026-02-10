@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/altf4/enforcer.git"
+    "url": "git+https://github.com/altf4/libenforcer.git"
   },
   "keywords": [
     "slippi",
@@ -34,9 +34,9 @@
   "author": "altf4",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/altf4/enforcer/issues"
+    "url": "https://github.com/altf4/libenforcer/issues"
   },
-  "homepage": "https://github.com/altf4/enforcer#readme",
+  "homepage": "https://github.com/altf4/libenforcer#readme",
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.2",
     "@types/jest": "^29.5.6",
