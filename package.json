@@ -14,9 +14,9 @@
     "build:wasm": "npm run build:wasm:node && npm run build:wasm:web",
     "build:ts": "tsc",
     "build": "npm run build:wasm:node && npm run build:ts",
-    "test": "node --experimental-vm-modules --experimental-wasm-reftypes node_modules/jest/bin/jest.js",
-    "test:watch": "node --experimental-vm-modules --experimental-wasm-reftypes node_modules/jest/bin/jest.js --watch",
-    "test:debug": "node --experimental-vm-modules --experimental-wasm-reftypes node_modules/jest/bin/jest.js --runInBand",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:debug": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:rust": "cd libenforcer-wasm && cargo test --target x86_64-unknown-linux-gnu",
     "test:all": "npm run test:rust && npm run test",
     "prepublishOnly": "npm run build"
