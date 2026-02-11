@@ -31,6 +31,7 @@ import wasmInit, {
   get_unique_coords,
   get_target_coords,
   get_game_settings,
+  SlpGame,
 } from '../pkg/web/libenforcer_wasm.js'
 
 // ---- Type Definitions ----
@@ -261,3 +262,7 @@ export function getGameSettings(slpBytes: Uint8Array): GameSettings {
   ensureInitialized()
   return get_game_settings(slpBytes) as GameSettings
 }
+
+// ---- Parsed Game Handle (parse once, query many times) ----
+
+export { SlpGame }

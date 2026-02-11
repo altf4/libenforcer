@@ -1,6 +1,6 @@
 {
   "name": "slp-enforcer",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "type": "module",
   "description": "Finds violations of the Melee Controller Ruleset by inspecting SLP files (WASM-powered)",
   "main": "dist/index.js",

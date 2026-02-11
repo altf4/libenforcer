@@ -29,6 +29,7 @@ mod handwarmer;
 
 use wasm_bindgen::prelude::*;
 use peppi::game::Game;
+use peppi::game::immutable::Game as ImmutableGame;
 use peppi::io::slippi::de::read as read_slippi;
 use std::io::Cursor;
 
@@ -369,4 +370,162 @@ pub fn get_target_coords(coords: JsValue) -> Result<JsValue, JsValue> {
 
     serde_wasm_bindgen::to_value(&targets)
         .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+}
+
+// ---- Parsed game handle: parse once, query many times ----
+
+/// A parsed SLP game that can be queried without re-parsing.
+/// Construct with `new SlpGame(slpBytes)`, then call methods on it.
+/// Call `.free()` when done to release Wasm memory.
+#[wasm_bindgen]
+pub struct SlpGame {
+    game: ImmutableGame,
+}
+
+#[wasm_bindgen]
+impl SlpGame {
+    /// Parse an SLP file. The parsed game is held in Wasm memory
+    /// until `.free()` is called.
+    #[wasm_bindgen(constructor)]
+    pub fn new(slp_bytes: &[u8]) -> Result<SlpGame, JsValue> {
+        let game = read_slippi(&mut Cursor::new(slp_bytes), None)
+            .map_err(|e| JsValue::from_str(&format!("Failed to parse SLP file: {}", e)))?;
+        Ok(SlpGame { game })
+    }
+
+    /// Run all checks on a specific player
+    #[wasm_bindgen(js_name = "analyzeReplay")]
+    pub fn analyze_replay(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found in this game"))?;
+        let results = checks::run_all(&player_data);
+        serde_wasm_bindgen::to_value(&results)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check for illegal travel time patterns
+    #[wasm_bindgen(js_name = "checkTravelTime")]
+    pub fn check_travel_time(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::travel_time::check(&player_data.main_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check for disallowed C-stick values
+    #[wasm_bindgen(js_name = "checkDisallowedCstick")]
+    pub fn check_disallowed_cstick(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::disallowed_analog::check(&player_data.main_coords, &player_data.c_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check for uptilt rounding
+    #[wasm_bindgen(js_name = "checkUptiltRounding")]
+    pub fn check_uptilt_rounding(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::uptilt_rounding::check(&player_data.main_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check for fast crouch-uptilt transitions
+    #[wasm_bindgen(js_name = "checkCrouchUptilt")]
+    pub fn check_crouch_uptilt(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::crouch_uptilt::check(&player_data.main_coords, &player_data.action_states);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check for illegal SDI patterns
+    #[wasm_bindgen(js_name = "checkSdi")]
+    pub fn check_sdi(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::sdi::check(&player_data.main_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check for GoomWave clamping
+    #[wasm_bindgen(js_name = "checkGoomwave")]
+    pub fn check_goomwave(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::goomwave::check(&player_data.main_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Control stick visualization
+    #[wasm_bindgen(js_name = "checkControlStickViz")]
+    pub fn check_control_stick_viz(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::control_stick_viz::check(&player_data.main_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check if the game is a handwarmer
+    #[wasm_bindgen(js_name = "isHandwarmer")]
+    pub fn is_handwarmer(&self) -> bool {
+        handwarmer::is_handwarmer(&self.game)
+    }
+
+    /// Extract game settings (stage, players)
+    #[wasm_bindgen(js_name = "getGameSettings")]
+    pub fn get_game_settings(&self) -> Result<JsValue, JsValue> {
+        let start = self.game.start();
+        let players = start.players.iter().map(|p| PlayerSettings {
+            player_index: p.port as u8,
+            character_id: p.character,
+            player_type: p.r#type as u8,
+            character_color: p.costume,
+        }).collect();
+
+        let settings = GameSettings {
+            stage_id: start.stage,
+            players,
+        };
+
+        serde_wasm_bindgen::to_value(&settings)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Check if SLP version is below 3.15.0
+    #[wasm_bindgen(js_name = "isSlpMinVersion")]
+    pub fn is_slp_min_version(&self) -> bool {
+        self.game.start().slippi.version.lt(3, 15)
+    }
+
+    /// Detect if a player is using a box controller
+    #[wasm_bindgen(js_name = "isBoxController")]
+    pub fn is_box_controller(&self, player_index: usize) -> Result<bool, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        Ok(utils::is_box_controller(&player_data.main_coords))
+    }
+
+    /// Extract joystick coordinates for a player
+    #[wasm_bindgen(js_name = "getCoordListFromGame")]
+    pub fn get_coord_list_from_game(&self, player_index: usize, is_main_stick: bool) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+
+        let coords = if is_main_stick {
+            player_data.main_coords
+        } else {
+            player_data.c_coords
+        };
+
+        serde_wasm_bindgen::to_value(&coords)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
 }
