@@ -100,25 +100,17 @@ function ensureInitialized(): void {
 /**
  * Initialize the WASM module. Must be called once before using any other function.
  *
- * - Node.js: call with no arguments; the WASM binary is loaded from disk automatically.
- * - Browser: call with no arguments (loads relative to the module URL), or pass a
- *   custom URL/path to the .wasm file if your bundler requires it.
+ * Call with no arguments to load from the default URL (relative to the module),
+ * or pass a custom URL/path/Response to the .wasm file if your bundler requires it.
+ * You may also pass raw WASM bytes (ArrayBuffer/Uint8Array) for synchronous initialization.
  */
 export default async function init(wasmSource?: any): Promise<void> {
   if (initialized) return
-
-  if (typeof process !== 'undefined' && process.versions?.node && !wasmSource) {
-    // Node.js: load WASM from disk synchronously
-    const { readFileSync } = await import('node:fs')
-    const { fileURLToPath } = await import('node:url')
-    const { dirname, join } = await import('node:path')
-    const dir = dirname(fileURLToPath(import.meta.url))
-    initSync({ module: readFileSync(join(dir, '..', 'pkg', 'web', 'libenforcer_wasm_bg.wasm')) })
+  if (wasmSource instanceof ArrayBuffer || ArrayBuffer.isView(wasmSource)) {
+    initSync({ module: wasmSource })
   } else {
-    // Browser (or explicit source): use fetch-based async loading
     await wasmInit(wasmSource)
   }
-
   initialized = true
 }
 export { init }

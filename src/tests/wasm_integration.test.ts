@@ -34,7 +34,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const TEST_DATA = path.join(__dirname, '../../test_data')
 
 beforeAll(async () => {
-  await init()
+  const wasmBytes = fs.readFileSync(path.join(__dirname, '../../pkg/web/libenforcer_wasm_bg.wasm'))
+  await init(wasmBytes)
 })
 
 function loadSlp(relativePath: string): Uint8Array {
