@@ -32,6 +32,25 @@ use peppi::game::Game;
 use peppi::io::slippi::de::read as read_slippi;
 use std::io::Cursor;
 
+#[derive(serde::Serialize)]
+struct PlayerSettings {
+    #[serde(rename = "playerIndex")]
+    player_index: u8,
+    #[serde(rename = "characterId")]
+    character_id: u8,
+    #[serde(rename = "playerType")]
+    player_type: u8,
+    #[serde(rename = "characterColor")]
+    character_color: u8,
+}
+
+#[derive(serde::Serialize)]
+struct GameSettings {
+    #[serde(rename = "stageId")]
+    stage_id: u16,
+    players: Vec<PlayerSettings>,
+}
+
 #[wasm_bindgen(start)]
 pub fn init() {
     // Set up better error messages in the browser console
@@ -173,6 +192,29 @@ pub fn check_handwarmer(slp_bytes: &[u8]) -> Result<JsValue, JsValue> {
     let result = handwarmer::is_handwarmer(&game);
 
     serde_wasm_bindgen::to_value(&result)
+        .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+}
+
+/// Extract game settings (stage, players) from a Slippi replay file
+#[wasm_bindgen]
+pub fn get_game_settings(slp_bytes: &[u8]) -> Result<JsValue, JsValue> {
+    let game = read_slippi(&mut Cursor::new(slp_bytes), None)
+        .map_err(|e| JsValue::from_str(&format!("Parse error: {}", e)))?;
+
+    let start = game.start();
+    let players = start.players.iter().map(|p| PlayerSettings {
+        player_index: p.port as u8,
+        character_id: p.character,
+        player_type: p.r#type as u8,
+        character_color: p.costume,
+    }).collect();
+
+    let settings = GameSettings {
+        stage_id: start.stage,
+        players,
+    };
+
+    serde_wasm_bindgen::to_value(&settings)
         .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
 }
 

@@ -30,6 +30,7 @@ import wasmInit, {
   is_equal,
   get_unique_coords,
   get_target_coords,
+  get_game_settings,
 } from '../pkg/web/libenforcer_wasm.js'
 
 // ---- Type Definitions ----
@@ -73,6 +74,16 @@ export type Check = {
 /** Metadata about an available check */
 export type CheckInfo = {
   name: string
+}
+
+export type GameSettings = {
+  stageId: number
+  players: {
+    playerIndex: number
+    characterId: number
+    playerType: number
+    characterColor: number
+  }[]
 }
 
 export enum JoystickRegion {
@@ -244,4 +255,9 @@ export function getUniqueCoords(coords: Coord[]): Coord[] {
 export function getTargetCoords(coords: Coord[]): Coord[] {
   ensureInitialized()
   return get_target_coords(coords) as Coord[]
+}
+
+export function getGameSettings(slpBytes: Uint8Array): GameSettings {
+  ensureInitialized()
+  return get_game_settings(slpBytes) as GameSettings
 }
