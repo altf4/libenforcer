@@ -28,7 +28,7 @@ jobs:
           cache: 'yarn'
       - name: Install JS dependencies
         run: yarn install --frozen-lockfile
-      - name: Build WASM (Node.js target)
-        run: cd libenforcer-wasm && wasm-pack build --target nodejs --out-dir ../pkg/node --release
+      - name: Build WASM
+        run: cd libenforcer-wasm && wasm-pack build --target web --out-dir ../pkg/web --release
       - name: Run JS tests
         run: yarn test
