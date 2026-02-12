@@ -90,6 +90,7 @@ pub struct AllCheckResults {
     pub sdi: CheckResult,
     pub goomwave: CheckResult,
     pub control_stick_viz: CheckResult,
+    pub input_fuzzing: CheckResult,
 }
 
 /// Joystick region classification (9 regions based on 0.2875 threshold)
@@ -123,5 +124,6 @@ pub fn list_checks() -> Vec<CheckInfo> {
         CheckInfo { name: "Illegal SDI".to_string() },
         CheckInfo { name: "GoomWave Clamping".to_string() },
         CheckInfo { name: "Control Stick Visualization".to_string() },
+        CheckInfo { name: "Input Fuzzing".to_string() },
     ]
 }

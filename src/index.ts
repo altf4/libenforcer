@@ -16,6 +16,7 @@ import wasmInit, {
   check_sdi,
   check_goomwave,
   check_control_stick_viz,
+  check_input_fuzzing,
   check_handwarmer,
   is_slp_min_version,
   is_box_controller,
@@ -64,6 +65,7 @@ export type AllCheckResults = {
   sdi: CheckResult
   goomwave: CheckResult
   control_stick_viz: CheckResult
+  input_fuzzing: CheckResult
 }
 
 /** Descriptor for a named check */
@@ -172,6 +174,11 @@ export function controlStickViz(slpBytes: Uint8Array, playerIndex: number): Chec
   return check_control_stick_viz(slpBytes, playerIndex) as CheckResult
 }
 
+export function hasIllegalInputFuzzing(slpBytes: Uint8Array, playerIndex: number): CheckResult {
+  ensureInitialized()
+  return check_input_fuzzing(slpBytes, playerIndex) as CheckResult
+}
+
 // ---- List Checks ----
 
 export function ListChecks(): Check[] {
@@ -183,6 +190,7 @@ export function ListChecks(): Check[] {
     { name: "Illegal SDI", checkFunction: hasIllegalSDI },
     { name: "GoomWave Clamping", checkFunction: isGoomwave },
     { name: "Control Stick Visualization", checkFunction: controlStickViz },
+    { name: "Input Fuzzing", checkFunction: hasIllegalInputFuzzing },
   ]
 }
 

@@ -200,9 +200,9 @@ test('normal game is not handwarmer', () => {
 
 // ---- ListChecks ----
 
-test('ListChecks returns 7 checks', () => {
+test('ListChecks returns 8 checks', () => {
   const checks = ListChecks()
-  expect(checks.length).toBe(7)
+  expect(checks.length).toBe(8)
   for (const check of checks) {
     expect(typeof check.name).toBe('string')
     expect(typeof check.checkFunction).toBe('function')

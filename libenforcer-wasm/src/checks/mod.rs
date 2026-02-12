@@ -5,6 +5,7 @@ pub mod crouch_uptilt;
 pub mod sdi;
 pub mod goomwave;
 pub mod control_stick_viz;
+pub mod input_fuzzing;
 
 use crate::parser::PlayerGameData;
 use crate::types::AllCheckResults;
@@ -19,5 +20,6 @@ pub fn run_all(data: &PlayerGameData) -> AllCheckResults {
         sdi: sdi::check(&data.main_coords),
         goomwave: goomwave::check(&data.main_coords),
         control_stick_viz: control_stick_viz::check(&data.main_coords),
+        input_fuzzing: input_fuzzing::check(&data.main_coords),
     }
 }
