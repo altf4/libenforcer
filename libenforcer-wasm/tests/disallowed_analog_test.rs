@@ -18,7 +18,7 @@ fn test_should_pass_check_for_disallowed_c_stick_values() {
     let coords = vec![Coord { x: 0.0, y: 0.0 }, Coord { x: 1.0, y: 1.0 }];
 
     let result = disallowed_analog::get_cstick_violations(&coords);
-    assert_eq!(result.violations.len(), 0, "Should have no violations");
+    assert_eq!(result.details.len(), 0, "Should have no violations");
 }
 
 #[test]
@@ -27,7 +27,7 @@ fn test_should_trigger_check_for_disallowed_c_stick_values_08() {
 
     let result = disallowed_analog::get_cstick_violations(&coords);
     assert_eq!(
-        result.violations.len(),
+        result.details.len(),
         1,
         "Should have 1 violation for x=0.8"
     );
@@ -39,7 +39,7 @@ fn test_should_trigger_check_for_disallowed_c_stick_values_06625() {
 
     let result = disallowed_analog::get_cstick_violations(&coords);
     assert_eq!(
-        result.violations.len(),
+        result.details.len(),
         1,
         "Should have 1 violation for x=0.6625"
     );

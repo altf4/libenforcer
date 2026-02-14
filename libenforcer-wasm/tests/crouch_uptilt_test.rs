@@ -25,13 +25,13 @@ fn test_crouch_uptilt_nonlegal() {
         "crouch_uptilt_unnerfed.slp should fail crouch uptilt check"
     );
     assert_eq!(
-        result.violations.len(),
+        result.details.len(),
         6,
         "Should have exactly 6 violations"
     );
 
     // All violations should start with evidence {x: 0, y: -1}
-    for violation in &result.violations {
+    for violation in &result.details {
         assert!(
             !violation.evidence.is_empty(),
             "Violation should have evidence"

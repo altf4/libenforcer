@@ -84,6 +84,6 @@ mod tests {
 
         let result = check(&coords, &action_states);
         assert_eq!(result.result, true);
-        assert!(result.violations.len() > 0);
+        assert!(result.details.len() > 0);
     }
 }

@@ -20,9 +20,9 @@ fn test_control_stick_viz_sanity_check() {
 
     let result = control_stick_viz::check(&player_data.main_coords);
     assert_eq!(result.result, false);
-    assert_eq!(result.violations.len(), 1);
+    assert_eq!(result.details.len(), 1);
     assert_eq!(
-        result.violations[0].evidence.len(),
+        result.details[0].evidence.len(),
         4845,
         "Expected 4845 evidence points for goomwave_uptilt_p1.slp"
     );

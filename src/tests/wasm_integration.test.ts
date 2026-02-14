@@ -114,7 +114,7 @@ test('banned c-stick file detected', () => {
   const slp = loadSlp('banned_c_stick_analog_player_1.slp')
   const result = hasDisallowedCStickCoords(slp, 0)
   expect(result.result).toBe(true)
-  expect(result.violations.length).toBeGreaterThan(0)
+  expect(result.details.length).toBeGreaterThan(0)
 })
 
 // ---- Goomwave ----
@@ -284,8 +284,8 @@ test('controlStickViz returns coords as evidence', () => {
   const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
   const result = controlStickViz(slp, 2)
   expect(result.result).toBe(false)
-  expect(result.violations.length).toBe(1)
-  expect(result.violations[0].evidence.length).toBeGreaterThan(0)
+  expect(result.details.length).toBe(1)
+  expect(result.details[0].evidence.length).toBeGreaterThan(0)
 })
 
 test('invalid input throws error', () => {

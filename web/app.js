@@ -117,10 +117,10 @@ function displayResults(allResults) {
 
             if (checkResult.result) {
                 statusSpan.textContent = '❌ VIOLATION';
-                if (checkResult.violations && checkResult.violations.length > 0) {
+                if (checkResult.details && checkResult.details.length > 0) {
                     const countSpan = document.createElement('span');
                     countSpan.className = 'violation-count';
-                    countSpan.textContent = `(${checkResult.violations.length} violation${checkResult.violations.length > 1 ? 's' : ''})`;
+                    countSpan.textContent = `(${checkResult.details.length} violation${checkResult.details.length > 1 ? 's' : ''})`;
                     statusSpan.appendChild(countSpan);
                 }
             } else {

@@ -54,28 +54,35 @@ impl Violation {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CheckResult {
     pub result: bool,           // true = violation detected
-    pub violations: Vec<Violation>,
+    pub details: Vec<Violation>,
 }
 
 impl CheckResult {
     pub fn pass() -> Self {
         CheckResult {
             result: false,
-            violations: vec![],
+            details: vec![],
         }
     }
 
-    pub fn fail(violations: Vec<Violation>) -> Self {
+    pub fn pass_single(metric: f64, reason: String) -> Self {
+        CheckResult {
+            result: false,
+            details: vec![Violation::new(metric, reason)],
+        }
+    }
+
+    pub fn fail(details: Vec<Violation>) -> Self {
         CheckResult {
             result: true,
-            violations,
+            details,
         }
     }
 
     pub fn fail_single(metric: f64, reason: String) -> Self {
         CheckResult {
             result: true,
-            violations: vec![Violation::new(metric, reason)],
+            details: vec![Violation::new(metric, reason)],
         }
     }
 }

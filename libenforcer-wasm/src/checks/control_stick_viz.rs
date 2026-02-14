@@ -10,6 +10,6 @@ pub fn check(coords: &[Coord]) -> CheckResult {
     );
     CheckResult {
         result: false,
-        violations: vec![violation],
+        details: vec![violation],
     }
 }

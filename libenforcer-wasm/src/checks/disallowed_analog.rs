@@ -53,7 +53,7 @@ mod tests {
 
         let result = get_cstick_violations(&coords);
         assert_eq!(result.result, true);
-        assert_eq!(result.violations.len(), 2);
+        assert_eq!(result.details.len(), 2);
     }
 
     #[test]
