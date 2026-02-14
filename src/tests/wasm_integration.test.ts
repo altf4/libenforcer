@@ -215,7 +215,7 @@ test('ListChecks check functions are callable', () => {
   for (const check of checks) {
     const result = check.checkFunction(slp, 2)
     expect(result).toHaveProperty('result')
-    expect(result).toHaveProperty('violations')
+    expect(result).toHaveProperty('details')
   }
 })
 
