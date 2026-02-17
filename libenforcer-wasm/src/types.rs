@@ -80,6 +80,30 @@ impl CheckResult {
     }
 }
 
+/// Per-axis fuzz delta distribution counts: [n_minus, n_zero, n_plus]
+pub type DeltaCounts = [usize; 3];
+
+/// Detailed statistical analysis of input fuzzing compliance
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FuzzAnalysis {
+    /// Overall pass/fail verdict
+    pub pass: bool,
+    /// Normalized per-event log-likelihood ratio (positive = evidence of proper fuzzing)
+    pub llr_score: f64,
+    /// Chi-squared p-value for X-axis deltas (None if insufficient data or axis exempt)
+    pub p_value_x: Option<f64>,
+    /// Chi-squared p-value for Y-axis deltas (None if insufficient data or axis exempt)
+    pub p_value_y: Option<f64>,
+    /// Total number of fuzz events analyzed
+    pub total_fuzz_events: usize,
+    /// Observed delta distribution for X-axis: [n_minus, n_zero, n_plus]
+    pub observed_x: DeltaCounts,
+    /// Observed delta distribution for Y-axis: [n_minus, n_zero, n_plus]
+    pub observed_y: DeltaCounts,
+    /// Detailed violation descriptions
+    pub violations: Vec<Violation>,
+}
+
 /// All check results for a single player
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AllCheckResults {

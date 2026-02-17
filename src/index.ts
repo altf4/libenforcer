@@ -17,6 +17,7 @@ import wasmInit, {
   check_goomwave,
   check_control_stick_viz,
   check_input_fuzzing,
+  analyze_input_fuzzing,
   check_handwarmer,
   is_slp_min_version,
   is_box_controller,
@@ -87,6 +88,18 @@ export type GameSettings = {
     playerType: number
     characterColor: number
   }[]
+}
+
+/** Detailed statistical analysis of input fuzzing compliance */
+export type FuzzAnalysis = {
+  pass: boolean
+  llr_score: number
+  p_value_x: number | null
+  p_value_y: number | null
+  total_fuzz_events: number
+  observed_x: [number, number, number]  // [n_minus, n_zero, n_plus]
+  observed_y: [number, number, number]  // [n_minus, n_zero, n_plus]
+  violations: Violation[]
 }
 
 export enum JoystickRegion {
@@ -177,6 +190,11 @@ export function controlStickViz(slpBytes: Uint8Array, playerIndex: number): Chec
 export function hasIllegalInputFuzzing(slpBytes: Uint8Array, playerIndex: number): CheckResult {
   ensureInitialized()
   return check_input_fuzzing(slpBytes, playerIndex) as CheckResult
+}
+
+export function analyzeInputFuzzing(slpBytes: Uint8Array, playerIndex: number): FuzzAnalysis {
+  ensureInitialized()
+  return analyze_input_fuzzing(slpBytes, playerIndex) as FuzzAnalysis
 }
 
 // ---- List Checks ----

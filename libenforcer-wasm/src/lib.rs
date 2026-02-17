@@ -199,6 +199,21 @@ pub fn check_input_fuzzing(slp_bytes: &[u8], player_index: usize) -> Result<JsVa
         .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
 }
 
+/// Analyze input fuzzing with full statistical breakdown
+#[wasm_bindgen]
+pub fn analyze_input_fuzzing(slp_bytes: &[u8], player_index: usize) -> Result<JsValue, JsValue> {
+    let game = read_slippi(&mut Cursor::new(slp_bytes), None)
+        .map_err(|e| JsValue::from_str(&format!("Parse error: {}", e)))?;
+
+    let player_data = parser::extract_player_data(&game, player_index)
+        .ok_or_else(|| JsValue::from_str("Player not found"))?;
+
+    let result = checks::input_fuzzing::analyze(&player_data.main_coords);
+
+    serde_wasm_bindgen::to_value(&result)
+        .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+}
+
 /// Check if a game is a handwarmer (warmup/practice session)
 #[wasm_bindgen]
 pub fn check_handwarmer(slp_bytes: &[u8]) -> Result<JsValue, JsValue> {
@@ -484,6 +499,16 @@ impl SlpGame {
         let player_data = parser::extract_player_data(&self.game, player_index)
             .ok_or_else(|| JsValue::from_str("Player not found"))?;
         let result = checks::input_fuzzing::check(&player_data.main_coords);
+        serde_wasm_bindgen::to_value(&result)
+            .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
+    }
+
+    /// Analyze input fuzzing with full statistical breakdown
+    #[wasm_bindgen(js_name = "analyzeInputFuzzing")]
+    pub fn analyze_input_fuzzing(&self, player_index: usize) -> Result<JsValue, JsValue> {
+        let player_data = parser::extract_player_data(&self.game, player_index)
+            .ok_or_else(|| JsValue::from_str("Player not found"))?;
+        let result = checks::input_fuzzing::analyze(&player_data.main_coords);
         serde_wasm_bindgen::to_value(&result)
             .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
     }
