@@ -5,6 +5,11 @@ use std::collections::HashMap;
 /// One raw coordinate unit in normalized space (1/80)
 const UNIT: f64 = 1.0 / 80.0;
 
+/// Magnitude threshold above which a NonCardinal coordinate is considered "on the rim".
+/// At raw magnitude ≥ 78, diagonal ±1 fuzz offsets can push past 80 and get absorbed
+/// by the game's unit-circle clamping, making fuzzing invisible.
+const RIM_MAGNITUDE_THRESHOLD: f64 = 0.975; // 78/80
+
 // --- Log-likelihood ratio constants ---
 // H_fuzz:   P(δ=0) = 0.50, P(δ=±1) = 0.25
 // H_nofuzz: P(δ=0) = 0.95, P(δ=±1) = 0.025
@@ -25,6 +30,9 @@ pub(crate) enum CoordClass {
     Deadzone,
     /// Both axes non-zero — 2D fuzzing required
     NonCardinal,
+    /// Both axes non-zero, magnitude ≥ RIM_MAGNITUDE_THRESHOLD.
+    /// Fuzz offsets may be absorbed by the game's unit-circle clamping.
+    Rim,
 }
 
 /// Classify a coordinate for fuzzing requirements
@@ -41,7 +49,12 @@ fn classify_coord(coord: &Coord) -> CoordClass {
     } else if x_zero || y_zero {
         CoordClass::Deadzone
     } else {
-        CoordClass::NonCardinal
+        let magnitude = (coord.x * coord.x + coord.y * coord.y).sqrt();
+        if magnitude >= RIM_MAGNITUDE_THRESHOLD {
+            CoordClass::Rim
+        } else {
+            CoordClass::NonCardinal
+        }
     }
 }
 
@@ -143,7 +156,7 @@ fn cluster_and_compute_deltas(holds: &[Hold]) -> Vec<FuzzEvent> {
         let class = classify_coord(&coord);
 
         match class {
-            CoordClass::Cardinal | CoordClass::Origin => continue,
+            CoordClass::Cardinal | CoordClass::Origin | CoordClass::Rim => continue,
             _ => {}
         }
 
@@ -335,7 +348,6 @@ fn build_violations(events: &[FuzzEvent], llr_score: f64) -> Vec<Violation> {
         per_target.entry(event.target_key).or_default().push(event);
     }
 
-    let num_targets = per_target.len();
     let total_events = events.len();
 
     // Compute odds ratio for the summary
@@ -345,18 +357,7 @@ fn build_violations(events: &[FuzzEvent], llr_score: f64) -> Vec<Violation> {
     // Overall summary violation
     violations.push(Violation::new(
         llr_score,
-        format!(
-            "Input fuzzing check failed. Analyzed {} coordinate transitions across {} target \
-             coordinate{}. Compliance score: {:.2} (score < 0 indicates missing or insufficient \
-             fuzzing; a properly fuzzed controller typically scores > 0.2).\n\
-             Odds against proper fuzzing: >10^{:.0} to 1 (based on {} independent coordinate transitions).",
-            total_events,
-            num_targets,
-            if num_targets == 1 { "" } else { "s" },
-            llr_score,
-            log10_odds,
-            total_events,
-        ),
+        format!("1 in 10^{:.0} odds of occurring by chance", log10_odds),
     ));
 
     // Per-target breakdowns, sorted by per-target LLR (worst first)
@@ -526,8 +527,9 @@ mod tests {
         assert_eq!(classify_coord(&Coord::new(0.0, 0.5)), CoordClass::Deadzone);
         assert_eq!(classify_coord(&Coord::new(-0.3, 0.0)), CoordClass::Deadzone);
         assert_eq!(classify_coord(&Coord::new(0.5, 0.5)), CoordClass::NonCardinal);
-        assert_eq!(classify_coord(&Coord::new(0.7, 0.7)), CoordClass::NonCardinal);
         assert_eq!(classify_coord(&Coord::new(-0.3, 0.4)), CoordClass::NonCardinal);
+        // (0.7, 0.7) has magnitude ~0.9899 >= 0.975 → Rim
+        assert_eq!(classify_coord(&Coord::new(0.7, 0.7)), CoordClass::Rim);
     }
 
     #[test]
@@ -758,5 +760,56 @@ mod tests {
         // P(X > 13.816) ≈ 0.001 for df=2
         let p = chi_sq_survival_df2(13.816);
         assert!((p - 0.001).abs() < 0.0005, "P(X > 13.816) should be ~0.001, got {}", p);
+    }
+
+    #[test]
+    fn test_classify_rim_coordinates() {
+        // Just above threshold: magnitude = sqrt(0.69^2 + 0.69^2) = 0.9758 >= 0.975
+        assert_eq!(classify_coord(&Coord::new(0.69, 0.69)), CoordClass::Rim);
+        // Just below threshold: magnitude = sqrt(0.68^2 + 0.68^2) = 0.9617 < 0.975
+        assert_eq!(classify_coord(&Coord::new(0.68, 0.68)), CoordClass::NonCardinal);
+        // Asymmetric rim: magnitude = sqrt(0.3827^2 + 0.9239^2) ≈ 1.0
+        assert_eq!(classify_coord(&Coord::new(0.3827, 0.9239)), CoordClass::Rim);
+    }
+
+    #[test]
+    fn test_deadzone_near_rim_stays_deadzone() {
+        // Deadzone coords have one axis zero — not affected by circular clamping
+        assert_eq!(classify_coord(&Coord::new(0.0, 0.975)), CoordClass::Deadzone);
+        assert_eq!(classify_coord(&Coord::new(0.0, 0.9875)), CoordClass::Deadzone);
+        assert_eq!(classify_coord(&Coord::new(0.9875, 0.0)), CoordClass::Deadzone);
+    }
+
+    #[test]
+    fn test_rim_coordinates_excluded_from_events() {
+        let rim_coord = Coord::new(0.7, 0.7); // magnitude ~0.99 → Rim
+        let outputs: Vec<Coord> = (0..30).map(|_| rim_coord).collect();
+        let coords = make_targeting_sequence(&outputs);
+        let holds = identify_holds(&coords);
+        let events = cluster_and_compute_deltas(&holds);
+        assert_eq!(events.len(), 0, "Rim coordinates should produce no fuzz events");
+    }
+
+    #[test]
+    fn test_analyze_rim_only_passes() {
+        let rim_coord = Coord::new(0.7, 0.7);
+        let outputs: Vec<Coord> = (0..50).map(|_| rim_coord).collect();
+        let coords = make_targeting_sequence(&outputs);
+        let analysis = analyze(&coords);
+        assert!(analysis.pass, "All-rim data should default to pass");
+        assert_eq!(analysis.total_fuzz_events, 0);
+    }
+
+    #[test]
+    fn test_mixed_rim_and_nonrim_unfuzzed_fails() {
+        // Non-rim unfuzzed data should still fail even with rim holds present
+        let non_rim = Coord::new(0.5, 0.5);
+        let rim = Coord::new(0.7, 0.7);
+        let mut outputs = Vec::new();
+        for _ in 0..25 { outputs.push(non_rim); }
+        for _ in 0..25 { outputs.push(rim); }
+        let coords = make_targeting_sequence(&outputs);
+        let analysis = analyze(&coords);
+        assert!(!analysis.pass, "Unfuzzed non-rim data should still fail");
     }
 }
