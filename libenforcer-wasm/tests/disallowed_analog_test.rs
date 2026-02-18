@@ -51,22 +51,9 @@ fn test_full_game_with_disallowed_c_stick_value() {
     let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
     let player_data = parser::extract_player_data(&game, 0).unwrap();
 
-    let result = disallowed_analog::check(&player_data.main_coords, &player_data.c_coords);
+    let result = disallowed_analog::check(&player_data.c_coords);
     assert_eq!(
         result.result, true,
         "banned_c_stick_analog_player_1.slp should fail C-stick check"
-    );
-}
-
-#[test]
-fn test_full_game_with_analog_controller_should_pass() {
-    let data = read_slp_file("legal/analog/traveltime/Game_8C56C529AEAA_20231022T181554.slp");
-    let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
-    let player_data = parser::extract_player_data(&game, 3).unwrap();
-
-    let result = disallowed_analog::check(&player_data.main_coords, &player_data.c_coords);
-    assert_eq!(
-        result.result, false,
-        "Game_8C56C529AEAA_20231022T181554.slp should pass C-stick check"
     );
 }

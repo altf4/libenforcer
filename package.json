@@ -19,11 +19,11 @@
     "build:wasm": "cd libenforcer-wasm && wasm-pack build --target web --out-dir ../pkg/web --release && rm -f ../pkg/web/.gitignore",
     "build:ts": "tsc",
     "build": "npm run build:wasm && npm run build:ts",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "test:debug": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test": "npm run test:rust && npm run test:ts",
+    "test:ts": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:ts:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:ts:debug": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:rust": "cd libenforcer-wasm && cargo test --target x86_64-unknown-linux-gnu",
-    "test:all": "npm run test:rust && npm run test",
     "prepublishOnly": "npm run build"
   },
   "repository": {

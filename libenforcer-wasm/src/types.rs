@@ -104,17 +104,31 @@ pub struct FuzzAnalysis {
     pub violations: Vec<Violation>,
 }
 
-/// All check results for a single player
+/// Controller type classification
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ControllerType {
+    Box,
+    Analog,
+}
+
+/// Full analysis results for a single player.
+/// Checks that don't apply to the detected controller type are None.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AllCheckResults {
-    pub travel_time: CheckResult,
-    pub disallowed_cstick: CheckResult,
-    pub uptilt_rounding: CheckResult,
-    pub crouch_uptilt: CheckResult,
-    pub sdi: CheckResult,
-    pub goomwave: CheckResult,
-    pub control_stick_viz: CheckResult,
-    pub input_fuzzing: CheckResult,
+pub struct PlayerAnalysis {
+    pub controller_type: ControllerType,
+    /// Aggregate verdict: true if all applicable checks pass
+    pub is_legal: bool,
+
+    // Box controller checks (None if analog)
+    pub travel_time: Option<CheckResult>,
+    pub disallowed_cstick: Option<CheckResult>,
+    pub crouch_uptilt: Option<CheckResult>,
+    pub sdi: Option<CheckResult>,
+    pub input_fuzzing: Option<FuzzAnalysis>,
+
+    // Analog controller checks (None if box)
+    pub goomwave: Option<CheckResult>,
+    pub uptilt_rounding: Option<CheckResult>,
 }
 
 /// Joystick region classification (9 regions based on 0.2875 threshold)
@@ -129,25 +143,4 @@ pub enum JoystickRegion {
     E = 6,
     S = 7,
     W = 8,
-}
-
-/// Metadata about an available check
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CheckInfo {
-    pub name: String,
-}
-
-/// Returns the list of all available checks.
-/// Mirrors TypeScript ListChecks() from index.ts.
-pub fn list_checks() -> Vec<CheckInfo> {
-    vec![
-        CheckInfo { name: "Box Travel Time".to_string() },
-        CheckInfo { name: "Disallowed Analog C-Stick Values".to_string() },
-        CheckInfo { name: "Uptilt Rounding".to_string() },
-        CheckInfo { name: "Fast Crouch Uptilt".to_string() },
-        CheckInfo { name: "Illegal SDI".to_string() },
-        CheckInfo { name: "GoomWave Clamping".to_string() },
-        CheckInfo { name: "Control Stick Visualization".to_string() },
-        CheckInfo { name: "Input Fuzzing".to_string() },
-    ]
 }

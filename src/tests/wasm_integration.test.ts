@@ -3,31 +3,20 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import init, {
-  analyzeReplay,
-  hasIllegalTravelTime,
-  hasDisallowedCStickCoords,
-  hasIllegalUptiltRounding,
-  hasIllegalCrouchUptilt,
-  hasIllegalSDI,
-  isGoomwave,
-  controlStickViz,
-  isHandwarmer,
-  isSlpMinVersion,
-  isBoxController,
+  SlpGame,
   isBoxControllerFromCoords,
-  ListChecks,
   FloatEquals,
   getJoystickRegion,
   JoystickRegion,
   getUniqueCoords,
   getTargetCoords,
-  getCoordListFromGame,
   averageTravelCoordHitRate,
   getCStickViolations,
   hasGoomwaveClamping,
   processAnalogStick,
   isEqual,
   Coord,
+  PlayerAnalysis,
 } from '../index.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -54,47 +43,80 @@ function loadSlpDir(relativePath: string): { name: string; data: Uint8Array }[] 
     })
 }
 
-// ---- analyzeReplay ----
+// ---- analyzePlayer ----
 
-test('analyzeReplay returns all check results', () => {
-  const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
-  const results = analyzeReplay(slp, 2)
+test('analyzePlayer returns structured results for box controller', () => {
+  const game = new SlpGame(loadSlp('legal/digital/potion_p3/potion_1.slp'))
+  const result: PlayerAnalysis = game.analyzePlayer(2)
 
-  expect(results).toHaveProperty('travel_time')
-  expect(results).toHaveProperty('disallowed_cstick')
-  expect(results).toHaveProperty('uptilt_rounding')
-  expect(results).toHaveProperty('crouch_uptilt')
-  expect(results).toHaveProperty('sdi')
-  expect(results).toHaveProperty('goomwave')
-  expect(results).toHaveProperty('control_stick_viz')
+  expect(result.controller_type).toBe('Box')
+  expect(typeof result.is_legal).toBe('boolean')
 
-  expect(results.travel_time.result).toBe(false)
-  expect(results.sdi.result).toBe(false)
+  // Box checks should be populated
+  expect(result.travel_time).not.toBeNull()
+  expect(result.disallowed_cstick).not.toBeNull()
+  expect(result.crouch_uptilt).not.toBeNull()
+  expect(result.sdi).not.toBeNull()
+  expect(result.input_fuzzing).not.toBeNull()
+
+  // Analog checks should be undefined for box controller
+  expect(result.goomwave).toBeUndefined()
+  expect(result.uptilt_rounding).toBeUndefined()
+
+  expect(result.travel_time!.result).toBe(false)
+  expect(result.sdi!.result).toBe(false)
+
+  game.free()
+})
+
+test('analyzePlayer returns structured results for analog controller', () => {
+  const game = new SlpGame(loadSlp('legal/analog/traveltime/Game_8C56C529AEAA_20231022T181554.slp'))
+  const result: PlayerAnalysis = game.analyzePlayer(3)
+
+  expect(result.controller_type).toBe('Analog')
+  expect(typeof result.is_legal).toBe('boolean')
+
+  // Box checks should be undefined for analog controller
+  expect(result.travel_time).toBeUndefined()
+  expect(result.disallowed_cstick).toBeUndefined()
+  expect(result.crouch_uptilt).toBeUndefined()
+  expect(result.sdi).toBeUndefined()
+  expect(result.input_fuzzing).toBeUndefined()
+
+  // Analog checks should be populated
+  expect(result.goomwave).not.toBeNull()
+  expect(result.uptilt_rounding).not.toBeNull()
+
+  game.free()
 })
 
 // ---- Travel Time ----
 
 test('legal digital files pass travel time', () => {
   for (let i = 1; i <= 7; i++) {
-    const slp = loadSlp(`legal/digital/potion_p3/potion_${i}.slp`)
-    const result = hasIllegalTravelTime(slp, 2)
-    expect(result.result).toBe(false)
+    const game = new SlpGame(loadSlp(`legal/digital/potion_p3/potion_${i}.slp`))
+    const result = game.analyzePlayer(2)
+    expect(result.travel_time!.result).toBe(false)
+    game.free()
   }
 })
 
 test('legal digital files have travel hit rate > 0.30', () => {
   for (let i = 1; i <= 7; i++) {
-    const slp = loadSlp(`legal/digital/potion_p3/potion_${i}.slp`)
-    const coords = getCoordListFromGame(slp, 2, true)
+    const game = new SlpGame(loadSlp(`legal/digital/potion_p3/potion_${i}.slp`))
+    const coords = game.getMainStickCoords(2)
     expect(averageTravelCoordHitRate(coords)).toBeGreaterThan(0.30)
+    game.free()
   }
 })
 
 test('nonlegal digital files fail travel time', () => {
   const files = loadSlpDir('nonlegal/digital/pre-ruleset/')
   for (const { name, data } of files) {
-    const result = hasIllegalTravelTime(data, 3)
-    expect(result.result).toBe(true)
+    const game = new SlpGame(data)
+    const result = game.analyzePlayer(3)
+    expect(result.travel_time!.result).toBe(true)
+    game.free()
   }
 })
 
@@ -111,34 +133,40 @@ test('averageTravelCoordHitRate with known coords', () => {
 // ---- Disallowed C-Stick ----
 
 test('banned c-stick file detected', () => {
-  const slp = loadSlp('banned_c_stick_analog_player_1.slp')
-  const result = hasDisallowedCStickCoords(slp, 0)
-  expect(result.result).toBe(true)
-  expect(result.violations.length).toBeGreaterThan(0)
+  const game = new SlpGame(loadSlp('banned_c_stick_analog_player_1.slp'))
+  const result = game.analyzePlayer(0)
+  expect(result.disallowed_cstick!.result).toBe(true)
+  expect(result.disallowed_cstick!.violations.length).toBeGreaterThan(0)
+  game.free()
 })
 
 // ---- Goomwave ----
 
 test('legal digital files are not goomwave', () => {
   for (let i = 1; i <= 7; i++) {
-    const slp = loadSlp(`legal/digital/potion_p3/potion_${i}.slp`)
-    const result = isGoomwave(slp, 2)
-    expect(result.result).toBe(false)
+    const game = new SlpGame(loadSlp(`legal/digital/potion_p3/potion_${i}.slp`))
+    const result = game.analyzePlayer(2)
+    // Box controller - goomwave should be undefined
+    expect(result.goomwave).toBeUndefined()
+    game.free()
   }
 })
 
 test('goomwave files detected (full check)', () => {
   const files = loadSlpDir('nonlegal/analog/goomwave/')
   for (const { name, data } of files) {
-    const result = isGoomwave(data, 1)
-    expect(result.result).toBe(true)
+    const game = new SlpGame(data)
+    const result = game.analyzePlayer(1)
+    expect(result.goomwave!.result).toBe(true)
+    game.free()
   }
 })
 
 test('goomwave clamping detected from coords', () => {
-  const slp = loadSlp('nonlegal/analog/goomwave_uptilt_p1.slp')
-  const coords = getCoordListFromGame(slp, 0, true)
+  const game = new SlpGame(loadSlp('nonlegal/analog/goomwave_uptilt_p1.slp'))
+  const coords = game.getMainStickCoords(0)
   expect(hasGoomwaveClamping(coords)).toBe(true)
+  game.free()
 })
 
 // ---- SDI ----
@@ -151,9 +179,10 @@ test('legal SDI files pass', () => {
     { file: 'legal/digital/sdi/Game_20250201T232732.slp', player: 1 },
   ]
   for (const { file, player } of cases) {
-    const slp = loadSlp(file)
-    const result = hasIllegalSDI(slp, player)
-    expect(result.result).toBe(false)
+    const game = new SlpGame(loadSlp(file))
+    const result = game.analyzePlayer(player)
+    expect(result.sdi!.result).toBe(false)
+    game.free()
   }
 })
 
@@ -164,24 +193,27 @@ test('nonlegal SDI files fail', () => {
     { file: 'nonlegal/digital/sdi/sdi_unnerfed.slp', player: 3 },
   ]
   for (const { file, player } of cases) {
-    const slp = loadSlp(file)
-    const result = hasIllegalSDI(slp, player)
-    expect(result.result).toBe(true)
+    const game = new SlpGame(loadSlp(file))
+    const result = game.analyzePlayer(player)
+    expect(result.sdi!.result).toBe(true)
+    game.free()
   }
 })
 
 // ---- Crouch Uptilt ----
 
 test('legal crouch uptilt file passes', () => {
-  const slp = loadSlp('legal/digital/crouch_uptilt_r18_v2.slp')
-  const result = hasIllegalCrouchUptilt(slp, 0)
-  expect(result.result).toBe(false)
+  const game = new SlpGame(loadSlp('legal/digital/crouch_uptilt_r18_v2.slp'))
+  const result = game.analyzePlayer(0)
+  expect(result.crouch_uptilt!.result).toBe(false)
+  game.free()
 })
 
 test('nonlegal crouch uptilt file fails', () => {
-  const slp = loadSlp('nonlegal/digital/crouch_uptilt/crouch_uptilt_unnerfed.slp')
-  const result = hasIllegalCrouchUptilt(slp, 3)
-  expect(result.result).toBe(true)
+  const game = new SlpGame(loadSlp('nonlegal/digital/crouch_uptilt/crouch_uptilt_unnerfed.slp'))
+  const result = game.analyzePlayer(3)
+  expect(result.crouch_uptilt!.result).toBe(true)
+  game.free()
 })
 
 // ---- Handwarmer ----
@@ -189,34 +221,16 @@ test('nonlegal crouch uptilt file fails', () => {
 test('handwarmer files detected', () => {
   const files = loadSlpDir('handwarmers/')
   for (const { name, data } of files) {
-    expect(isHandwarmer(data)).toBe(true)
+    const game = new SlpGame(data)
+    expect(game.isHandwarmer()).toBe(true)
+    game.free()
   }
 })
 
 test('normal game is not handwarmer', () => {
-  const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
-  expect(isHandwarmer(slp)).toBe(false)
-})
-
-// ---- ListChecks ----
-
-test('ListChecks returns 8 checks', () => {
-  const checks = ListChecks()
-  expect(checks.length).toBe(8)
-  for (const check of checks) {
-    expect(typeof check.name).toBe('string')
-    expect(typeof check.checkFunction).toBe('function')
-  }
-})
-
-test('ListChecks check functions are callable', () => {
-  const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
-  const checks = ListChecks()
-  for (const check of checks) {
-    const result = check.checkFunction(slp, 2)
-    expect(result).toHaveProperty('result')
-    expect(result).toHaveProperty('violations')
-  }
+  const game = new SlpGame(loadSlp('legal/digital/potion_p3/potion_1.slp'))
+  expect(game.isHandwarmer()).toBe(false)
+  game.free()
 })
 
 // ---- Utility Functions ----
@@ -270,26 +284,29 @@ test('getTargetCoords returns coords held 2+ frames', () => {
 })
 
 test('isBoxController detects box controller', () => {
-  const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
-  expect(isBoxController(slp, 2)).toBe(true)
+  const game = new SlpGame(loadSlp('legal/digital/potion_p3/potion_1.slp'))
+  expect(game.isBoxController(2)).toBe(true)
+  game.free()
 })
 
 test('isBoxControllerFromCoords works with coord array', () => {
-  const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
-  const coords = getCoordListFromGame(slp, 2, true)
+  const game = new SlpGame(loadSlp('legal/digital/potion_p3/potion_1.slp'))
+  const coords = game.getMainStickCoords(2)
   expect(isBoxControllerFromCoords(coords)).toBe(true)
+  game.free()
 })
 
-test('controlStickViz returns coords as evidence', () => {
-  const slp = loadSlp('legal/digital/potion_p3/potion_1.slp')
-  const result = controlStickViz(slp, 2)
-  expect(result.result).toBe(false)
-  expect(result.violations.length).toBe(1)
-  expect(result.violations[0].evidence.length).toBeGreaterThan(0)
+test('getMainStickCoords returns coords', () => {
+  const game = new SlpGame(loadSlp('legal/digital/potion_p3/potion_1.slp'))
+  const coords = game.getMainStickCoords(2)
+  expect(coords.length).toBeGreaterThan(0)
+  expect(coords[0]).toHaveProperty('x')
+  expect(coords[0]).toHaveProperty('y')
+  game.free()
 })
 
 test('invalid input throws error', () => {
   expect(() => {
-    analyzeReplay(new Uint8Array([0, 1, 2, 3]), 0)
+    new SlpGame(new Uint8Array([0, 1, 2, 3]))
   }).toThrow()
 })

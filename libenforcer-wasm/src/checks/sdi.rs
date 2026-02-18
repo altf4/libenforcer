@@ -1,5 +1,4 @@
 use crate::types::{CheckResult, Coord, Violation};
-use crate::utils::is_box_controller;
 use std::collections::HashSet;
 
 /// SDI regions for directional input classification
@@ -285,13 +284,7 @@ pub fn fails_sdi_rule_three(coords: &[Coord]) -> Vec<Violation> {
 }
 
 /// Check for illegal SDI patterns
-/// Only applies to box controllers
 pub fn check(coords: &[Coord]) -> CheckResult {
-    // Only applies to box controllers
-    if !is_box_controller(coords) {
-        return CheckResult::pass();
-    }
-
     let mut all_violations = Vec::new();
 
     all_violations.extend(fails_sdi_rule_one(coords));

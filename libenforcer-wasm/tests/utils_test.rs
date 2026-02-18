@@ -327,10 +327,3 @@ fn test_process_main_stick_inputs() {
         }
     }
 }
-
-#[cfg(not(target_arch = "wasm32"))]
-#[test]
-fn test_list_checks() {
-    let checks = types::list_checks();
-    assert_eq!(checks.len(), 7, "Expected 7 checks");
-}

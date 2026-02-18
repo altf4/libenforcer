@@ -1,15 +1,8 @@
 use crate::types::{CheckResult, Coord};
-use crate::utils::is_box_controller;
 
 /// Check for illegal uptilt rounding on analog controllers
 /// Detects when analog inputs are artificially rounded/quantized
-/// Only applies to analog controllers
 pub fn check(coords: &[Coord]) -> CheckResult {
-    // Only applies to analog controllers (box controllers pass)
-    if is_box_controller(coords) {
-        return CheckResult::pass();
-    }
-
     get_uptilt_check(coords)
 }
 

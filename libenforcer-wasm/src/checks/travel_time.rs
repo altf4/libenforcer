@@ -1,15 +1,10 @@
 use crate::types::{CheckResult, Coord};
-use crate::utils::{is_box_controller, is_equal_coord};
+use crate::utils::is_equal_coord;
 
 /// Check for illegal travel time patterns on box controllers
 /// Box controllers should have ~36% travel coordinates
 /// Less than 25% indicates suspicious behavior
 pub fn check(coords: &[Coord]) -> CheckResult {
-    // Only applies to box controllers
-    if !is_box_controller(coords) {
-        return CheckResult::pass();
-    }
-
     let travel_percent = average_travel_coord_hit_rate(coords);
 
     if travel_percent < 0.25 {

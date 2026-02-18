@@ -1,15 +1,8 @@
 use crate::types::{CheckResult, Coord, Violation};
-use crate::utils::is_box_controller;
 
 /// Check for impossibly fast crouch-to-uptilt transitions
 /// Human reaction time makes transitions <3 frames impossible
-/// Only applies to box controllers
 pub fn check(coords: &[Coord], action_states: &[u16]) -> CheckResult {
-    // Only applies to box controllers
-    if !is_box_controller(coords) {
-        return CheckResult::pass();
-    }
-
     const CROUCH_STATE: u16 = 0x28;
     const UPTILT_STATE: u16 = 0x38;
 

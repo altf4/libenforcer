@@ -1,5 +1,5 @@
 use crate::types::{CheckResult, Coord, DeltaCounts, FuzzAnalysis, Violation};
-use crate::utils::{float_equals, is_box_controller, is_equal_coord};
+use crate::utils::{float_equals, is_equal_coord};
 use std::collections::HashMap;
 
 /// One raw coordinate unit in normalized space (1/80)
@@ -465,19 +465,6 @@ fn pct(count: usize, total: usize) -> f64 {
 /// Perform full statistical analysis of input fuzzing compliance.
 /// Returns a FuzzAnalysis with LLR score, chi-squared p-values, and delta distributions.
 pub fn analyze(coords: &[Coord]) -> FuzzAnalysis {
-    if !is_box_controller(coords) {
-        return FuzzAnalysis {
-            pass: true,
-            llr_score: 0.0,
-            p_value_x: None,
-            p_value_y: None,
-            total_fuzz_events: 0,
-            observed_x: [0, 0, 0],
-            observed_y: [0, 0, 0],
-            violations: vec![],
-        };
-    }
-
     let holds = identify_holds(coords);
     let events = cluster_and_compute_deltas(&holds);
     let (x_counts, y_counts) = accumulate_deltas(&events);

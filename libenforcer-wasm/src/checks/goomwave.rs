@@ -1,16 +1,9 @@
 use crate::types::{CheckResult, Coord};
-use crate::utils::is_box_controller;
 
 /// Check for GoomWave hardware modification
 /// GoomWave clamps small stick movements to cardinal directions
 /// Detection: absence of coordinates with small off-axis values
-/// Only applies to analog controllers
 pub fn check(coords: &[Coord]) -> CheckResult {
-    // Only applies to analog controllers (box controllers pass)
-    if is_box_controller(coords) {
-        return CheckResult::pass();
-    }
-
     if has_goomwave_clamping(coords) {
         return CheckResult::fail_single(
             0.0,

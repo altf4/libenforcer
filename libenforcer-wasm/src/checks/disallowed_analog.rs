@@ -1,15 +1,9 @@
 use crate::types::{CheckResult, Coord, Violation};
-use crate::utils::{float_equals, is_box_controller};
+use crate::utils::float_equals;
 
 /// Check for disallowed C-stick coordinate values
 /// Certain exact values indicate controller hardware manipulation
-/// Only applies to box controllers
-pub fn check(main_coords: &[Coord], c_coords: &[Coord]) -> CheckResult {
-    // Only applies to box controllers
-    if !is_box_controller(main_coords) {
-        return CheckResult::pass();
-    }
-
+pub fn check(c_coords: &[Coord]) -> CheckResult {
     get_cstick_violations(c_coords)
 }
 

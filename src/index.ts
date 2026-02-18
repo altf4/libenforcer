@@ -2,27 +2,14 @@
 // All business logic runs in Rust/WebAssembly via the peppi SLP parser.
 //
 // Usage:
-//   import init, { analyzeReplay } from 'slp-enforcer'
+//   import init, { SlpGame } from 'slp-enforcer'
 //   await init()
-//   const result = analyzeReplay(slpBytes, playerIndex)
+//   const game = new SlpGame(slpBytes)
+//   const result = game.analyzePlayer(playerIndex)
 
 import wasmInit, {
   initSync,
-  analyze_replay,
-  check_travel_time,
-  check_disallowed_cstick,
-  check_uptilt_rounding,
-  check_crouch_uptilt,
-  check_sdi,
-  check_goomwave,
-  check_control_stick_viz,
-  check_input_fuzzing,
-  analyze_input_fuzzing,
-  check_handwarmer,
-  is_slp_min_version,
-  is_box_controller,
   is_box_controller_from_coords,
-  get_coord_list_from_game,
   get_cstick_violations,
   average_travel_coord_hit_rate,
   has_goomwave_clamping,
@@ -32,7 +19,6 @@ import wasmInit, {
   is_equal,
   get_unique_coords,
   get_target_coords,
-  get_game_settings,
   SlpGame,
 } from '../pkg/web/libenforcer_wasm.js'
 
@@ -57,38 +43,8 @@ export type CheckResult = {
   violations: Violation[]
 }
 
-/** Result of running all checks via analyzeReplay */
-export type AllCheckResults = {
-  travel_time: CheckResult
-  disallowed_cstick: CheckResult
-  uptilt_rounding: CheckResult
-  crouch_uptilt: CheckResult
-  sdi: CheckResult
-  goomwave: CheckResult
-  control_stick_viz: CheckResult
-  input_fuzzing: CheckResult
-}
-
-/** Descriptor for a named check */
-export type Check = {
-  name: string
-  checkFunction: (slpBytes: Uint8Array, playerIndex: number) => CheckResult
-}
-
-/** Metadata about an available check */
-export type CheckInfo = {
-  name: string
-}
-
-export type GameSettings = {
-  stageId: number
-  players: {
-    playerIndex: number
-    characterId: number
-    playerType: number
-    characterColor: number
-  }[]
-}
+/** Controller type classification */
+export type ControllerType = "Box" | "Analog"
 
 /** Detailed statistical analysis of input fuzzing compliance */
 export type FuzzAnalysis = {
@@ -100,6 +56,33 @@ export type FuzzAnalysis = {
   observed_x: [number, number, number]  // [n_minus, n_zero, n_plus]
   observed_y: [number, number, number]  // [n_minus, n_zero, n_plus]
   violations: Violation[]
+}
+
+/** Full analysis results for a single player */
+export type PlayerAnalysis = {
+  controller_type: ControllerType
+  is_legal: boolean
+
+  // Box controller checks (undefined if analog)
+  travel_time?: CheckResult
+  disallowed_cstick?: CheckResult
+  crouch_uptilt?: CheckResult
+  sdi?: CheckResult
+  input_fuzzing?: FuzzAnalysis
+
+  // Analog controller checks (undefined if box)
+  goomwave?: CheckResult
+  uptilt_rounding?: CheckResult
+}
+
+export type GameSettings = {
+  stageId: number
+  players: {
+    playerIndex: number
+    characterId: number
+    playerType: number
+    characterColor: number
+  }[]
 }
 
 export enum JoystickRegion {
@@ -142,106 +125,20 @@ export default async function init(wasmSource?: any): Promise<void> {
 }
 export { init }
 
-// ---- Replay Analysis ----
+// ---- Primary API: SlpGame ----
 
-/** Run all checks on a player in one call */
-export function analyzeReplay(slpBytes: Uint8Array, playerIndex: number): AllCheckResults {
-  ensureInitialized()
-  return analyze_replay(slpBytes, playerIndex) as AllCheckResults
-}
-
-// ---- Individual Check Functions ----
-
-export function hasIllegalTravelTime(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_travel_time(slpBytes, playerIndex) as CheckResult
-}
-
-export function hasDisallowedCStickCoords(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_disallowed_cstick(slpBytes, playerIndex) as CheckResult
-}
-
-export function hasIllegalUptiltRounding(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_uptilt_rounding(slpBytes, playerIndex) as CheckResult
-}
-
-export function hasIllegalCrouchUptilt(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_crouch_uptilt(slpBytes, playerIndex) as CheckResult
-}
-
-export function hasIllegalSDI(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_sdi(slpBytes, playerIndex) as CheckResult
-}
-
-export function isGoomwave(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_goomwave(slpBytes, playerIndex) as CheckResult
-}
-
-export function controlStickViz(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_control_stick_viz(slpBytes, playerIndex) as CheckResult
-}
-
-export function hasIllegalInputFuzzing(slpBytes: Uint8Array, playerIndex: number): CheckResult {
-  ensureInitialized()
-  return check_input_fuzzing(slpBytes, playerIndex) as CheckResult
-}
-
-export function analyzeInputFuzzing(slpBytes: Uint8Array, playerIndex: number): FuzzAnalysis {
-  ensureInitialized()
-  return analyze_input_fuzzing(slpBytes, playerIndex) as FuzzAnalysis
-}
-
-// ---- List Checks ----
-
-export function ListChecks(): Check[] {
-  return [
-    { name: "Box Travel Time", checkFunction: hasIllegalTravelTime },
-    { name: "Disallowed Analog C-Stick Values", checkFunction: hasDisallowedCStickCoords },
-    { name: "Uptilt Rounding", checkFunction: hasIllegalUptiltRounding },
-    { name: "Fast Crouch Uptilt", checkFunction: hasIllegalCrouchUptilt },
-    { name: "Illegal SDI", checkFunction: hasIllegalSDI },
-    { name: "GoomWave Clamping", checkFunction: isGoomwave },
-    { name: "Control Stick Visualization", checkFunction: controlStickViz },
-    { name: "Input Fuzzing", checkFunction: hasIllegalInputFuzzing },
-  ]
-}
+export { SlpGame }
 
 // ---- Utility Functions ----
-
-export function isHandwarmer(slpBytes: Uint8Array): boolean {
-  ensureInitialized()
-  return check_handwarmer(slpBytes) as boolean
-}
-
-export function isSlpMinVersion(slpBytes: Uint8Array): boolean {
-  ensureInitialized()
-  return is_slp_min_version(slpBytes)
-}
-
-export function isBoxController(slpBytes: Uint8Array, playerIndex: number): boolean {
-  ensureInitialized()
-  return is_box_controller(slpBytes, playerIndex)
-}
 
 export function isBoxControllerFromCoords(coords: Coord[]): boolean {
   ensureInitialized()
   return is_box_controller_from_coords(coords)
 }
 
-export function getCoordListFromGame(slpBytes: Uint8Array, playerIndex: number, isMainStick: boolean): Coord[] {
+export function getCStickViolations(coords: Coord[]): CheckResult {
   ensureInitialized()
-  return get_coord_list_from_game(slpBytes, playerIndex, isMainStick) as Coord[]
-}
-
-export function getCStickViolations(coords: Coord[]): Violation[] {
-  ensureInitialized()
-  return get_cstick_violations(coords) as Violation[]
+  return get_cstick_violations(coords) as CheckResult
 }
 
 export function averageTravelCoordHitRate(coords: Coord[]): number {
@@ -283,12 +180,3 @@ export function getTargetCoords(coords: Coord[]): Coord[] {
   ensureInitialized()
   return get_target_coords(coords) as Coord[]
 }
-
-export function getGameSettings(slpBytes: Uint8Array): GameSettings {
-  ensureInitialized()
-  return get_game_settings(slpBytes) as GameSettings
-}
-
-// ---- Parsed Game Handle (parse once, query many times) ----
-
-export { SlpGame }
