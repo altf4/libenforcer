@@ -16,6 +16,9 @@ const RIM_MAGNITUDE_THRESHOLD: f64 = 0.975; // 78/80
 const LLR_DELTA_ZERO: f64 = -0.6418538; // ln(0.50 / 0.95)
 const LLR_DELTA_ONE: f64 = 2.3025851;   // ln(0.25 / 0.025)
 
+/// Minimum fuzz events (after filtering uninformative singletons) before we use LLR for pass/fail
+const MIN_EVENTS_FOR_LLR: usize = 8;
+
 /// Minimum fuzz events before we consider chi-squared reliable
 const MIN_EVENTS_FOR_CHI_SQ: usize = 20;
 
@@ -195,6 +198,17 @@ fn cluster_and_compute_deltas(holds: &[Hold]) -> Vec<FuzzEvent> {
         }
     }
 
+    // --- Pass 2b: Compute cluster size per target ---
+    // A target's cluster size = total holds across all unambiguous keys assigned to it.
+    // Targets with cluster_size=1 have a single hold that trivially sits at delta=0,
+    // providing no information about fuzzing presence. Exclude them.
+    let mut target_cluster_size: HashMap<(i32, i32), usize> = HashMap::new();
+    for (key, claimants) in &key_claimants {
+        if claimants.len() == 1 {
+            *target_cluster_size.entry(claimants[0]).or_insert(0) += key_counts[key];
+        }
+    }
+
     // --- Pass 3: Produce events only for unambiguous keys ---
     let mut events = Vec::new();
     for hold in holds {
@@ -210,6 +224,12 @@ fn cluster_and_compute_deltas(holds: &[Hold]) -> Vec<FuzzEvent> {
         }
 
         let target_key = claimants[0];
+
+        // Skip events from targets with only 1 hold in their cluster —
+        // a lone hold always has delta=0 and is uninformative.
+        if target_cluster_size.get(&target_key).copied().unwrap_or(0) < 2 {
+            continue;
+        }
         let target_coord = Coord::new(
             target_key.0 as f64 * UNIT,
             target_key.1 as f64 * UNIT,
@@ -478,7 +498,7 @@ pub fn analyze(coords: &[Coord]) -> FuzzAnalysis {
     // Pass/fail decision: LLR is the sole decision maker.
     // Chi-squared p-values are informational (reported but don't auto-fail).
     // This avoids false positives on controllers with slight distribution biases.
-    let (pass, violations) = if total_fuzz_events < MIN_EVENTS_FOR_CHI_SQ {
+    let (pass, violations) = if total_fuzz_events < MIN_EVENTS_FOR_LLR {
         // Insufficient data — default to pass (avoid false positives)
         (true, vec![])
     } else if llr_score < 0.0 {
