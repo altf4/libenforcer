@@ -56,9 +56,9 @@ fn test_uptilt_rounding_nonlegal_analog() {
         "goomwave_uptilt_p1.slp should fail uptilt rounding check"
     );
     assert!(
-        result.violations.len() >= 1,
+        result.details.len() >= 1,
         "Should have at least 1 violation, got {}",
-        result.violations.len()
+        result.details.len()
     );
 }
 
@@ -73,7 +73,7 @@ fn test_uptilt_rounding_legal_analog_b() {
         result.result, false,
         "Game_20250107T140347.slp should pass uptilt rounding check"
     );
-    assert_eq!(result.violations.len(), 0, "Should have 0 violations");
+    assert_eq!(result.details.len(), 0, "Should have 0 violations");
 }
 
 #[test]
@@ -87,7 +87,7 @@ fn test_uptilt_rounding_legal_analog_c() {
         result.result, false,
         "Game_20250107T142211.slp should pass uptilt rounding check"
     );
-    assert_eq!(result.violations.len(), 0, "Should have 0 violations");
+    assert_eq!(result.details.len(), 0, "Should have 0 violations");
 }
 
 #[test]
@@ -101,5 +101,5 @@ fn test_uptilt_rounding_legal_analog_d() {
         result.result, false,
         "Game_20250123T212056.slp should pass uptilt rounding check"
     );
-    assert_eq!(result.violations.len(), 0, "Should have 0 violations");
+    assert_eq!(result.details.len(), 0, "Should have 0 violations");
 }

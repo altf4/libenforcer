@@ -40,7 +40,7 @@ export type Violation = {
 /** Result of running a single check */
 export type CheckResult = {
   result: boolean
-  violations: Violation[]
+  details: Violation[]
 }
 
 /** Controller type classification */

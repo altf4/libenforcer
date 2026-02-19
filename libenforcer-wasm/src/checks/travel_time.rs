@@ -14,7 +14,10 @@ pub fn check(coords: &[Coord]) -> CheckResult {
         );
     }
 
-    CheckResult::pass()
+    CheckResult::pass_single(
+        travel_percent,
+        format!("Travel coordinate hit rate: {:.1}%", travel_percent * 100.0),
+    )
 }
 
 /// Calculate the average travel coordinate hit rate
