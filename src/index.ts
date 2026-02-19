@@ -1,4 +1,4 @@
-// slp-enforcer v3.0 -- WASM-backed implementation (universal: Node.js + Browser)
+// slp-enforcer -- WASM-backed implementation (universal: Node.js + Browser)
 // All business logic runs in Rust/WebAssembly via the peppi SLP parser.
 //
 // Usage:
