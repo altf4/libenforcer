@@ -2,16 +2,7 @@ name: test
 on: [push, pull_request]
 
 jobs:
-  rust-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Run Rust tests
-        run: cd libenforcer-wasm && cargo test --target x86_64-unknown-linux-gnu
-
-  js-tests:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +19,5 @@ jobs:
           cache: 'yarn'
       - name: Install JS dependencies
         run: yarn install --frozen-lockfile
-      - name: Build WASM
-        run: cd libenforcer-wasm && wasm-pack build --target web --out-dir ../pkg/web --release
-      - name: Run JS tests
-        run: yarn test
+      - name: Run all tests
+        run: yarn test:all

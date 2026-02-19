@@ -136,7 +136,7 @@ test('banned c-stick file detected', () => {
   const game = new SlpGame(loadSlp('banned_c_stick_analog_player_1.slp'))
   const result = game.analyzePlayer(0)
   expect(result.disallowed_cstick!.result).toBe(true)
-  expect(result.disallowed_cstick!.violations.length).toBeGreaterThan(0)
+  expect(result.disallowed_cstick!.details.length).toBeGreaterThan(0)
   game.free()
 })
 
