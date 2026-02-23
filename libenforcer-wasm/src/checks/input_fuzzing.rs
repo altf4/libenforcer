@@ -16,8 +16,16 @@ const RIM_MAGNITUDE_THRESHOLD: f64 = 0.975; // 78/80
 const LLR_DELTA_ZERO: f64 = -0.6418538; // ln(0.50 / 0.95)
 const LLR_DELTA_ONE: f64 = 2.3025851;   // ln(0.25 / 0.025)
 
-/// Minimum fuzz events (after filtering uninformative singletons) before we use LLR for pass/fail
-const MIN_EVENTS_FOR_LLR: usize = 8;
+/// Minimum cumulative evidence (in nats) before declaring a controller unfuzzed.
+/// Uses a Sequential Probability Ratio Test (SPRT) approach: the total log-likelihood
+/// must exceed this threshold before we flag the controller. This naturally accounts
+/// for sample size — small samples need overwhelmingly consistent zero-deltas to fail,
+/// while large samples can detect subtler patterns.
+///
+/// Value of 6.5 corresponds to ~0.15% false positive rate (exp(-6.5) ≈ 0.0015).
+/// In practice, this requires roughly 10+ axis observations of consistent zero-delta
+/// behavior: ~5-6 NonCardinal events or ~10-11 Deadzone events.
+const FAIL_THRESHOLD_NATS: f64 = 6.5;
 
 /// Minimum fuzz events before we consider chi-squared reliable
 const MIN_EVENTS_FOR_CHI_SQ: usize = 20;
@@ -113,16 +121,15 @@ struct FuzzEvent {
 }
 
 /// Get the neighbor offsets for a given coordinate classification.
-fn neighbor_offsets_for(coord: &Coord, class: &CoordClass) -> Vec<(i32, i32)> {
+///
+/// Both Deadzone and NonCardinal use a full 3×3 neighborhood (minus center)
+/// because the fuzzer adds ±1 to BOTH axes independently. For Deadzone targets,
+/// the zero-axis fuzz offsets create coordinates that would otherwise be classified
+/// as NonCardinal and lost. Expanding to 8 neighbors captures them; the fuzzability
+/// flags (x_fuzzable/y_fuzzable) still correctly limit which axis deltas are scored.
+fn neighbor_offsets_for(_coord: &Coord, class: &CoordClass) -> Vec<(i32, i32)> {
     match class {
-        CoordClass::Deadzone => {
-            if float_equals(coord.y, 0.0) {
-                vec![(-1, 0), (1, 0)]
-            } else {
-                vec![(0, -1), (0, 1)]
-            }
-        }
-        CoordClass::NonCardinal => {
+        CoordClass::Deadzone | CoordClass::NonCardinal => {
             vec![
                 (-1, -1), (-1, 0), (-1, 1),
                 (0, -1),           (0, 1),
@@ -495,17 +502,20 @@ pub fn analyze(coords: &[Coord]) -> FuzzAnalysis {
     let p_value_x = chi_squared_test(&x_counts);
     let p_value_y = chi_squared_test(&y_counts);
 
-    // Pass/fail decision: LLR is the sole decision maker.
+    // Pass/fail decision uses SPRT-style total evidence threshold.
+    // Instead of checking normalized LLR with a minimum event count, we compute the
+    // cumulative log-likelihood and require it to exceed FAIL_THRESHOLD_NATS before
+    // declaring unfuzzed. This naturally handles variable sample sizes — small samples
+    // need very strong per-event evidence, while large samples can detect weaker signals.
     // Chi-squared p-values are informational (reported but don't auto-fail).
-    // This avoids false positives on controllers with slight distribution biases.
-    let (pass, violations) = if total_fuzz_events < MIN_EVENTS_FOR_LLR {
-        // Insufficient data — default to pass (avoid false positives)
-        (true, vec![])
-    } else if llr_score < 0.0 {
-        // LLR negative = more consistent with no-fuzzing hypothesis
+    let total_axis_obs: usize = x_counts.iter().sum::<usize>() + y_counts.iter().sum::<usize>();
+    let total_score = llr_score * total_axis_obs as f64;
+
+    let (pass, violations) = if total_score < -FAIL_THRESHOLD_NATS {
+        // Strong cumulative evidence of no fuzzing
         (false, build_violations(&events, llr_score))
     } else {
-        // LLR positive = evidence of fuzzing present
+        // Insufficient evidence or evidence of fuzzing — pass
         (true, vec![])
     };
 
