@@ -17,6 +17,22 @@ pub fn is_equal_coord(one: &Coord, other: &Coord) -> bool {
 pub fn is_box_controller(coordinates: &[Coord]) -> bool {
     const RIM_COORD_MAX: usize = 432;
     const THREE_MINUTES: usize = 10800; // frames
+    const MIN_ANALOG_SMALL_OFF_AXIS_RATIO: f64 = 0.02;
+    const MIN_ANALOG_SMALL_OFF_AXIS_UNIQUE: usize = 32;
+
+    let (small_off_axis_count, small_off_axis_unique_count) =
+        count_small_off_axis_coords(coordinates);
+    let small_off_axis_ratio = if coordinates.is_empty() {
+        0.0
+    } else {
+        small_off_axis_count as f64 / coordinates.len() as f64
+    };
+
+    if small_off_axis_ratio >= MIN_ANALOG_SMALL_OFF_AXIS_RATIO
+        && small_off_axis_unique_count >= MIN_ANALOG_SMALL_OFF_AXIS_UNIQUE
+    {
+        return false;
+    }
 
     let rim_count = count_rim_coords(coordinates);
     let mut rim_proportion = rim_count as f64 / RIM_COORD_MAX as f64;
@@ -30,6 +46,26 @@ pub fn is_box_controller(coordinates: &[Coord]) -> bool {
 
     // If less than 50% of rim coordinates hit, it's likely a box controller
     rim_proportion < 0.50
+}
+
+/// Count coordinates with natural analog off-axis evidence.
+/// These are coordinates where both axes are active, but one axis is a small
+/// nonzero value. Box controllers should almost never produce many of these.
+fn count_small_off_axis_coords(coords: &[Coord]) -> (usize, usize) {
+    const SMALL_OFF_AXIS_THRESHOLD: f64 = 0.08;
+
+    let mut count = 0;
+    let mut unique_coords = HashSet::new();
+
+    for coord in coords {
+        let min_abs_axis = coord.x.abs().min(coord.y.abs());
+        if min_abs_axis > 0.0 && min_abs_axis < SMALL_OFF_AXIS_THRESHOLD {
+            count += 1;
+            unique_coords.insert((coord.x.to_bits(), coord.y.to_bits()));
+        }
+    }
+
+    (count, unique_coords.len())
 }
 
 /// Count unique coordinates on the rim of the joystick

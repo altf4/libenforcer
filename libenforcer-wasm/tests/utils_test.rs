@@ -6,7 +6,7 @@
 mod common;
 
 use common::*;
-use libenforcer_wasm::{parser, types, types::Coord, utils};
+use libenforcer_wasm::{checks, parser, types::ControllerType, types::Coord, utils};
 use peppi::game::Game;
 use peppi::io::slippi::de::read as read_slippi;
 use std::io::Cursor;
@@ -209,6 +209,78 @@ fn test_is_box_inputs_orca_dataset_e() {
         false,
         "Orca dataset E should not be detected as box"
     );
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn test_is_box_inputs_issue15_orca_replays() {
+    let cases = [
+        (
+            "legal/analog/orca/issue15_battlefield.slp",
+            "issue #15 Battlefield",
+        ),
+        (
+            "legal/analog/orca/issue15_dream_land.slp",
+            "issue #15 Dream Land",
+        ),
+    ];
+
+    for (path, label) in cases {
+        let data = read_slp_file(path);
+        let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
+        let player_data = parser::extract_player_data(&game, 0).unwrap();
+
+        assert_eq!(
+            utils::is_box_controller(&player_data.main_coords),
+            false,
+            "{} Orca P1 should not be detected as box",
+            label
+        );
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn test_analyze_player_issue15_orca_replays_as_analog() {
+    let cases = [
+        (
+            "legal/analog/orca/issue15_battlefield.slp",
+            "issue #15 Battlefield",
+        ),
+        (
+            "legal/analog/orca/issue15_dream_land.slp",
+            "issue #15 Dream Land",
+        ),
+    ];
+
+    for (path, label) in cases {
+        let data = read_slp_file(path);
+        let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
+        let player_data = parser::extract_player_data(&game, 0).unwrap();
+        let analysis = checks::analyze_player(&player_data);
+
+        assert_eq!(
+            analysis.controller_type,
+            ControllerType::Analog,
+            "{} Orca P1 should be analyzed as analog",
+            label
+        );
+        assert!(
+            analysis.is_legal,
+            "{} Orca P1 should pass aggregate legality",
+            label
+        );
+        assert!(
+            analysis.sdi.is_none(),
+            "{} Orca P1 should skip box-only SDI checks",
+            label
+        );
+        assert!(
+            analysis.input_fuzzing.is_none(),
+            "{} Orca P1 should skip box-only input fuzzing checks",
+            label
+        );
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
