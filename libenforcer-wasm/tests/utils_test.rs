@@ -285,6 +285,107 @@ fn test_analyze_player_issue15_orca_replays_as_analog() {
 
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
+fn test_is_box_inputs_additional_orca_false_positive_replays() {
+    let cases = [
+        (
+            "legal/analog/orca/travel_time_20251228_230022.slp",
+            0,
+            "travel time 20251228 230022",
+        ),
+        (
+            "legal/analog/orca/travel_time_20251228_230302.slp",
+            0,
+            "travel time 20251228 230302",
+        ),
+        (
+            "legal/analog/orca/travel_time_20260227_104159.slp",
+            0,
+            "travel time 20260227 104159",
+        ),
+        (
+            "legal/analog/orca/illegal_sdi_20260418_224946.slp",
+            1,
+            "illegal SDI 20260418 224946",
+        ),
+    ];
+
+    for (path, player_index, label) in cases {
+        let data = read_slp_file(path);
+        let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
+        let player_data = parser::extract_player_data(&game, player_index).unwrap();
+
+        assert_eq!(
+            utils::is_box_controller(&player_data.main_coords),
+            false,
+            "{} Orca player should not be detected as box",
+            label
+        );
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn test_analyze_player_additional_orca_false_positive_replays_as_analog() {
+    let cases = [
+        (
+            "legal/analog/orca/travel_time_20251228_230022.slp",
+            0,
+            "travel time 20251228 230022",
+        ),
+        (
+            "legal/analog/orca/travel_time_20251228_230302.slp",
+            0,
+            "travel time 20251228 230302",
+        ),
+        (
+            "legal/analog/orca/travel_time_20260227_104159.slp",
+            0,
+            "travel time 20260227 104159",
+        ),
+        (
+            "legal/analog/orca/illegal_sdi_20260418_224946.slp",
+            1,
+            "illegal SDI 20260418 224946",
+        ),
+    ];
+
+    for (path, player_index, label) in cases {
+        let data = read_slp_file(path);
+        let game = read_slippi(&mut Cursor::new(&data), None).unwrap();
+        let player_data = parser::extract_player_data(&game, player_index).unwrap();
+        let analysis = checks::analyze_player(&player_data);
+
+        assert_eq!(
+            analysis.controller_type,
+            ControllerType::Analog,
+            "{} Orca player should be analyzed as analog",
+            label
+        );
+        assert!(
+            analysis.is_legal,
+            "{} Orca player should pass aggregate legality",
+            label
+        );
+        assert!(
+            analysis.travel_time.is_none(),
+            "{} Orca player should skip box-only travel time checks",
+            label
+        );
+        assert!(
+            analysis.sdi.is_none(),
+            "{} Orca player should skip box-only SDI checks",
+            label
+        );
+        assert!(
+            analysis.input_fuzzing.is_none(),
+            "{} Orca player should skip box-only input fuzzing checks",
+            label
+        );
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
 fn test_is_box_inputs_xbox_controller_a() {
     let data = read_slp_file("legal/analog/xbox_p2/Game_20250209T181347.slp");
     let game = read_slippi(&mut Cursor::new(&data), None).unwrap();

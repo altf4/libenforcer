@@ -19,6 +19,8 @@ pub fn is_box_controller(coordinates: &[Coord]) -> bool {
     const THREE_MINUTES: usize = 10800; // frames
     const MIN_ANALOG_SMALL_OFF_AXIS_RATIO: f64 = 0.02;
     const MIN_ANALOG_SMALL_OFF_AXIS_UNIQUE: usize = 32;
+    const MIN_ANALOG_CARDINAL_UNIQUE: usize = 100;
+    const MIN_ANALOG_RIM_UNIQUE: usize = 40;
 
     let (small_off_axis_count, small_off_axis_unique_count) =
         count_small_off_axis_coords(coordinates);
@@ -35,6 +37,15 @@ pub fn is_box_controller(coordinates: &[Coord]) -> bool {
     }
 
     let rim_count = count_rim_coords(coordinates);
+
+    if count_strict_rim_coords(coordinates) >= MIN_ANALOG_RIM_UNIQUE {
+        let (_, cardinal_analog_unique_count) = count_cardinal_analog_coords(coordinates);
+
+        if cardinal_analog_unique_count >= MIN_ANALOG_CARDINAL_UNIQUE {
+            return false;
+        }
+    }
+
     let mut rim_proportion = rim_count as f64 / RIM_COORD_MAX as f64;
 
     // Boost proportion for shorter games to avoid false positives
@@ -60,6 +71,43 @@ fn count_small_off_axis_coords(coords: &[Coord]) -> (usize, usize) {
     for coord in coords {
         let min_abs_axis = coord.x.abs().min(coord.y.abs());
         if min_abs_axis > 0.0 && min_abs_axis < SMALL_OFF_AXIS_THRESHOLD {
+            count += 1;
+            unique_coords.insert((coord.x.to_bits(), coord.y.to_bits()));
+        }
+    }
+
+    (count, unique_coords.len())
+}
+
+/// Count unique coordinates that are actually on the rim, without fuzz tolerance.
+/// The box fallback uses tolerant rim detection; this stricter version avoids
+/// treating normal one-step fuzz around full cardinals as analog rim coverage.
+fn count_strict_rim_coords(coords: &[Coord]) -> usize {
+    let mut rim_coords = HashSet::new();
+
+    for coord in coords {
+        let distance = (coord.x.powi(2) + coord.y.powi(2)).sqrt();
+
+        if distance >= 1.0 {
+            rim_coords.insert((coord.x.to_bits(), coord.y.to_bits()));
+        }
+    }
+
+    rim_coords.len()
+}
+
+/// Count axis-aligned coordinates with analog magnitudes below full cardinal.
+/// This catches analog-button traces that have little off-axis noise, while the
+/// rim-coordinate requirement keeps ordinary fuzzed box inputs classified as box.
+fn count_cardinal_analog_coords(coords: &[Coord]) -> (usize, usize) {
+    let mut count = 0;
+    let mut unique_coords = HashSet::new();
+
+    for coord in coords {
+        let min_abs_axis = coord.x.abs().min(coord.y.abs());
+        let max_abs_axis = coord.x.abs().max(coord.y.abs());
+
+        if min_abs_axis == 0.0 && max_abs_axis > 0.0 && max_abs_axis < 1.0 {
             count += 1;
             unique_coords.insert((coord.x.to_bits(), coord.y.to_bits()));
         }
